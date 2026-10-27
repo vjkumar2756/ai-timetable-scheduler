@@ -1,0 +1,55 @@
+{
+  "settings": {
+    "days": ["Mon", "Tue", "Wed", "Thu", "Fri"],
+    "periods_per_day": 7,
+    "default_lunch_period": 4
+  },
+  "subjects": [
+    {"id": "CS201", "code": "CS201", "name": "Computer Architecture", "weekly_hours": 3, "type": "theory", "lab_duration": 1},
+    {"id": "CS202", "code": "CS202", "name": "Design & Analysis of Algorithms", "weekly_hours": 3, "type": "theory", "lab_duration": 1},
+    {"id": "CS203", "code": "CS203", "name": "Database Management Systems", "weekly_hours": 3, "type": "theory", "lab_duration": 1},
+    {"id": "CS204", "code": "CS204", "name": "Theory of Computation", "weekly_hours": 3, "type": "theory", "lab_duration": 1},
+    {"id": "AI201", "code": "AI201", "name": "Deep Learning Principles", "weekly_hours": 3, "type": "theory", "lab_duration": 1},
+    {"id": "MA201", "code": "MA201", "name": "Probability & Statistics", "weekly_hours": 3, "type": "theory", "lab_duration": 1},
+    {"id": "CS205L", "code": "CS205L", "name": "Algorithms Lab", "weekly_hours": 2, "type": "lab", "lab_duration": 2},
+    {"id": "CS206L", "code": "CS206L", "name": "DBMS Systems Lab", "weekly_hours": 2, "type": "lab", "lab_duration": 2}
+  ],
+  "teachers": [
+    {"id": "T01", "name": "Dr. Ramesh Battula", "subject_ids": ["CS202", "CS205L"], "unavailable_slots": [{"day": "Mon", "period": 1}], "max_weekly_load": 18, "preferred_slots": [{"day": "Tue", "period": 2}], "active": true},
+    {"id": "T02", "name": "Dr. Pooja Sharma", "subject_ids": ["CS201", "AI201"], "unavailable_slots": [{"day": "Fri", "period": 7}], "max_weekly_load": 18, "preferred_slots": [{"day": "Wed", "period": 3}], "active": true},
+    {"id": "T03", "name": "Dr. Ritam Sharma", "subject_ids": ["AI201", "CS204"], "unavailable_slots": [], "max_weekly_load": 18, "preferred_slots": [{"day": "Mon", "period": 3}], "active": true},
+    {"id": "T04", "name": "Dr. Veena Khandelwal", "subject_ids": ["AI201", "CS203"], "unavailable_slots": [{"day": "Wed", "period": 1}], "max_weekly_load": 18, "preferred_slots": [{"day": "Thu", "period": 2}], "active": true},
+    {"id": "T05", "name": "Dr. Prashant Goyal", "subject_ids": ["MA201"], "unavailable_slots": [], "max_weekly_load": 20, "preferred_slots": [{"day": "Tue", "period": 1}], "active": true},
+    {"id": "T06", "name": "Mr. Tanmay Udaival", "subject_ids": ["CS202", "CS205L"], "unavailable_slots": [], "max_weekly_load": 18, "preferred_slots": [{"day": "Mon", "period": 5}], "active": true},
+    {"id": "T07", "name": "Dr. Shibna Hussain", "subject_ids": ["CS203", "CS206L"], "unavailable_slots": [{"day": "Thu", "period": 7}], "max_weekly_load": 18, "preferred_slots": [{"day": "Fri", "period": 2}], "active": true},
+    {"id": "T08", "name": "Ms. Kalpana Pathak", "subject_ids": ["CS206L", "CS203"], "unavailable_slots": [], "max_weekly_load": 18, "preferred_slots": [{"day": "Wed", "period": 5}], "active": true},
+    {"id": "T09", "name": "Mr. Nitin Bhana", "subject_ids": ["CS201", "CS205L"], "unavailable_slots": [], "max_weekly_load": 18, "preferred_slots": [{"day": "Thu", "period": 3}], "active": true},
+    {"id": "T10", "name": "Dr. Ankita Birla", "subject_ids": ["MA201", "CS204"], "unavailable_slots": [{"day": "Tue", "period": 6}], "max_weekly_load": 18, "preferred_slots": [{"day": "Mon", "period": 2}], "active": true},
+    {"id": "T11", "name": "Prof. Leslie Lamport", "subject_ids": ["CS204", "CS201"], "unavailable_slots": [], "max_weekly_load": 18, "preferred_slots": [{"day": "Fri", "period": 3}], "active": true},
+    {"id": "T12", "name": "Dr. Barbara Liskov", "subject_ids": ["CS203", "CS206L"], "unavailable_slots": [], "max_weekly_load": 18, "preferred_slots": [{"day": "Wed", "period": 2}], "active": true},
+    {"id": "T13", "name": "Dr. Geoffrey Hinton", "subject_ids": ["AI201", "CS205L"], "unavailable_slots": [{"day": "Mon", "period": 7}], "max_weekly_load": 18, "preferred_slots": [{"day": "Tue", "period": 5}], "active": true},
+    {"id": "T14", "name": "Dr. Yann LeCun", "subject_ids": ["AI201", "CS202"], "unavailable_slots": [], "max_weekly_load": 18, "preferred_slots": [{"day": "Thu", "period": 5}], "active": true},
+    {"id": "T15", "name": "Prof. Donald Knuth", "subject_ids": ["CS202", "MA201"], "unavailable_slots": [], "max_weekly_load": 18, "preferred_slots": [{"day": "Fri", "period": 1}], "active": true},
+    {"id": "T16", "name": "Dr. Andrew Ng", "subject_ids": ["AI201", "CS203"], "unavailable_slots": [], "max_weekly_load": 18, "preferred_slots": [{"day": "Wed", "period": 1}], "active": true}
+  ],
+  "classes": [
+    {"id": "CSE_4A", "name": "B.Tech CSE - 4th Sem (A)", "strength": 55, "subject_requirements": {"CS201": 3, "CS202": 3, "CS203": 3, "MA201": 3, "CS205L": 2}, "lunch_break_period": 4, "active": true},
+    {"id": "CSE_4B", "name": "B.Tech CSE - 4th Sem (B)", "strength": 50, "subject_requirements": {"CS201": 3, "CS202": 3, "CS203": 3, "MA201": 3, "CS205L": 2}, "lunch_break_period": 4, "active": true},
+    {"id": "AIDE_4A", "name": "B.Tech AI & DE - 4th Sem (A)", "strength": 50, "subject_requirements": {"AI201": 3, "CS202": 3, "CS203": 3, "MA201": 3, "CS206L": 2}, "lunch_break_period": 4, "active": true},
+    {"id": "AIDE_4B", "name": "B.Tech AI & DE - 4th Sem (B)", "strength": 48, "subject_requirements": {"AI201": 3, "CS202": 3, "CS204": 3, "MA201": 3, "CS206L": 2}, "lunch_break_period": 4, "active": true},
+    {"id": "IT_4A", "name": "B.Tech IT - 4th Sem (A)", "strength": 52, "subject_requirements": {"CS201": 3, "CS203": 3, "CS204": 3, "MA201": 3, "CS205L": 2}, "lunch_break_period": 4, "active": true},
+    {"id": "IT_4B", "name": "B.Tech IT - 4th Sem (B)", "strength": 50, "subject_requirements": {"CS201": 3, "CS203": 3, "CS204": 3, "MA201": 3, "CS206L": 2}, "lunch_break_period": 4, "active": true},
+    {"id": "ECE_4", "name": "B.Tech ECE - 4th Sem", "strength": 45, "subject_requirements": {"CS201": 3, "CS202": 3, "CS204": 3, "MA201": 3, "CS205L": 2}, "lunch_break_period": 4, "active": true},
+    {"id": "CS_DS_4", "name": "B.Tech Data Science - 4th Sem", "strength": 45, "subject_requirements": {"AI201": 3, "CS202": 3, "CS203": 3, "MA201": 3, "CS206L": 2}, "lunch_break_period": 4, "active": true}
+  ],
+  "rooms": [
+    {"id": "LT1", "name": "Lecture Theater 1", "capacity": 70, "type": "classroom", "active": true},
+    {"id": "LT2", "name": "Lecture Theater 2", "capacity": 65, "type": "classroom", "active": true},
+    {"id": "LT3", "name": "Lecture Theater 3", "capacity": 65, "type": "classroom", "active": true},
+    {"id": "LT4", "name": "Lecture Theater 4", "capacity": 60, "type": "classroom", "active": true},
+    {"id": "LT5", "name": "Lecture Theater 5", "capacity": 60, "type": "classroom", "active": true},
+    {"id": "LT6", "name": "Lecture Theater 6", "capacity": 60, "type": "classroom", "active": true},
+    {"id": "LAB36", "name": "Computing Lab 36", "capacity": 60, "type": "lab", "active": true},
+    {"id": "LAB137", "name": "AI/Data Engineering Lab 137", "capacity": 60, "type": "lab", "active": true}
+  ]
+}

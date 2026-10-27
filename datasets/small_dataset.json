@@ -1,0 +1,121 @@
+{
+  "settings": {
+    "days": ["Mon", "Tue", "Wed", "Thu", "Fri"],
+    "periods_per_day": 6,
+    "default_lunch_period": 4
+  },
+  "subjects": [
+    {"id": "CS101", "code": "CS101", "name": "Artificial Intelligence", "weekly_hours": 3, "type": "theory", "lab_duration": 1},
+    {"id": "CS102", "code": "CS102", "name": "Data Structures", "weekly_hours": 3, "type": "theory", "lab_duration": 1},
+    {"id": "CS103", "code": "CS103", "name": "Operating Systems", "weekly_hours": 3, "type": "theory", "lab_duration": 1},
+    {"id": "MA101", "code": "MA101", "name": "Discrete Mathematics", "weekly_hours": 3, "type": "theory", "lab_duration": 1},
+    {"id": "CS104L", "code": "CS104L", "name": "AI Programming Lab", "weekly_hours": 2, "type": "lab", "lab_duration": 2},
+    {"id": "CS105L", "code": "CS105L", "name": "Data Structures Lab", "weekly_hours": 2, "type": "lab", "lab_duration": 2}
+  ],
+  "teachers": [
+    {
+      "id": "T1",
+      "name": "Dr. Alan Turing",
+      "subject_ids": ["CS101", "CS104L"],
+      "unavailable_slots": [{"day": "Mon", "period": 1}],
+      "max_weekly_load": 15,
+      "preferred_slots": [{"day": "Tue", "period": 2}, {"day": "Wed", "period": 3}],
+      "active": true
+    },
+    {
+      "id": "T2",
+      "name": "Prof. Ada Lovelace",
+      "subject_ids": ["CS102", "CS105L"],
+      "unavailable_slots": [{"day": "Fri", "period": 6}],
+      "max_weekly_load": 15,
+      "preferred_slots": [{"day": "Mon", "period": 2}],
+      "active": true
+    },
+    {
+      "id": "T3",
+      "name": "Dr. John von Neumann",
+      "subject_ids": ["CS103"],
+      "unavailable_slots": [],
+      "max_weekly_load": 15,
+      "preferred_slots": [{"day": "Thu", "period": 2}],
+      "active": true
+    },
+    {
+      "id": "T4",
+      "name": "Dr. Claude Shannon",
+      "subject_ids": ["MA101"],
+      "unavailable_slots": [{"day": "Wed", "period": 1}],
+      "max_weekly_load": 15,
+      "preferred_slots": [{"day": "Tue", "period": 3}],
+      "active": true
+    },
+    {
+      "id": "T5",
+      "name": "Prof. Grace Hopper",
+      "subject_ids": ["CS102", "CS103", "CS105L"],
+      "unavailable_slots": [],
+      "max_weekly_load": 15,
+      "preferred_slots": [{"day": "Fri", "period": 2}],
+      "active": true
+    },
+    {
+      "id": "T6",
+      "name": "Dr. Donald Knuth",
+      "subject_ids": ["CS101", "MA101", "CS104L"],
+      "unavailable_slots": [],
+      "max_weekly_load": 15,
+      "preferred_slots": [{"day": "Wed", "period": 2}],
+      "active": true
+    }
+  ],
+  "classes": [
+    {
+      "id": "CSE_3A",
+      "name": "CSE - 3rd Sem (Section A)",
+      "strength": 45,
+      "subject_requirements": {
+        "CS101": 3,
+        "CS102": 3,
+        "CS103": 3,
+        "MA101": 3,
+        "CS104L": 2
+      },
+      "lunch_break_period": 4,
+      "active": true
+    },
+    {
+      "id": "CSE_3B",
+      "name": "CSE - 3rd Sem (Section B)",
+      "strength": 40,
+      "subject_requirements": {
+        "CS101": 3,
+        "CS102": 3,
+        "CS103": 3,
+        "MA101": 3,
+        "CS105L": 2
+      },
+      "lunch_break_period": 4,
+      "active": true
+    },
+    {
+      "id": "AIML_3",
+      "name": "AIML - 3rd Sem",
+      "strength": 38,
+      "subject_requirements": {
+        "CS101": 3,
+        "CS102": 3,
+        "CS103": 3,
+        "MA101": 3,
+        "CS104L": 2
+      },
+      "lunch_break_period": 4,
+      "active": true
+    }
+  ],
+  "rooms": [
+    {"id": "R101", "name": "Room 101 (Lecture Hall A)", "capacity": 60, "type": "classroom", "active": true},
+    {"id": "R102", "name": "Room 102 (Lecture Hall B)", "capacity": 55, "type": "classroom", "active": true},
+    {"id": "R103", "name": "Room 103 (Lecture Hall C)", "capacity": 50, "type": "classroom", "active": true},
+    {"id": "LAB1", "name": "Advanced Computing Lab", "capacity": 50, "type": "lab", "active": true}
+  ]
+}

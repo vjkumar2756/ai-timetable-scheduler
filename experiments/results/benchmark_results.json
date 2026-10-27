@@ -1,0 +1,109 @@
+{
+  "small": {
+    "plain_backtracking": {
+      "algorithm": "Plain Backtracking (Baseline)",
+      "time_taken_seconds": 0.0021,
+      "nodes_expanded": 39,
+      "hard_violations": 0,
+      "soft_penalty": 676,
+      "success_rate": 1.0,
+      "success": true,
+      "trials": 1
+    },
+    "improved_backtracking": {
+      "algorithm": "Improved Backtracking (MRV+FC+Degree+LCV)",
+      "time_taken_seconds": 0.1099,
+      "nodes_expanded": 39,
+      "hard_violations": 0,
+      "soft_penalty": 571,
+      "success_rate": 1.0,
+      "success": true,
+      "trials": 1
+    },
+    "min_conflicts": {
+      "algorithm": "Min-Conflicts Local Search",
+      "time_taken_seconds": 0.0058,
+      "nodes_expanded": 1,
+      "hard_violations": 0,
+      "soft_penalty": 526.1,
+      "success_rate": 1.0,
+      "success": true,
+      "trials": 10
+    },
+    "simulated_annealing": {
+      "algorithm": "Simulated Annealing (Bonus)",
+      "time_taken_seconds": 0.0948,
+      "nodes_expanded": 2020,
+      "hard_violations": 0,
+      "soft_penalty": 352.0,
+      "success_rate": 1.0,
+      "success": true,
+      "trials": 10
+    },
+    "hybrid": {
+      "algorithm": "Hybrid CSP + SA (Bonus)",
+      "time_taken_seconds": 0.1863,
+      "nodes_expanded": 1940,
+      "hard_violations": 0,
+      "soft_penalty": 354.0,
+      "success_rate": 1.0,
+      "success": true,
+      "trials": 10
+    }
+  },
+  "large": {
+    "plain_backtracking": {
+      "algorithm": "Plain Backtracking (Baseline)",
+      "time_taken_seconds": 0.0313,
+      "nodes_expanded": 104,
+      "hard_violations": 0,
+      "soft_penalty": 2310,
+      "success_rate": 1.0,
+      "success": true,
+      "trials": 1
+    },
+    "improved_backtracking": {
+      "algorithm": "Improved Backtracking (MRV+FC+Degree+LCV)",
+      "time_taken_seconds": 3.4456,
+      "nodes_expanded": 104,
+      "hard_violations": 0,
+      "soft_penalty": 1482,
+      "success_rate": 1.0,
+      "success": true,
+      "trials": 1
+    },
+    "min_conflicts": {
+      "algorithm": "Min-Conflicts Local Search",
+      "time_taken_seconds": 0.0783,
+      "nodes_expanded": 1,
+      "hard_violations": 0,
+      "soft_penalty": 1438.5,
+      "success_rate": 1.0,
+      "success": true,
+      "trials": 10
+    },
+    "simulated_annealing": {
+      "algorithm": "Simulated Annealing (Bonus)",
+      "time_taken_seconds": 0.2989,
+      "nodes_expanded": 2020,
+      "hard_violations": 1,
+      "soft_penalty": 1096.3,
+      "success_rate": 0.1,
+      "success": true,
+      "trials": 10
+    },
+    "hybrid": {
+      "algorithm": "Hybrid CSP + SA (Bonus)",
+      "time_taken_seconds": 3.8833,
+      "nodes_expanded": 1940,
+      "hard_violations": 0,
+      "soft_penalty": 1083.7,
+      "success_rate": 1.0,
+      "success": true,
+      "trials": 10
+    }
+  },
+  "min_conflicts_sample_cost_history": [
+    552
+  ]
+}
