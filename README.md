@@ -25,9 +25,9 @@
   - Plateau escape via Random Walk ($p = 0.08$) and Random Restarts.
   - Iteration tracking and Cost History generation.
 
-### 2. Bonus Algorithms (+12 Marks)
-- **Simulated Annealing (+6):** Probabilistic local search with geometric temperature cooling ($T_{k+1} = \alpha T_k$) and single-move / pairwise session swap neighborhood operators.
-- **Hybrid CSP + Simulated Annealing (+6):** Two-stage pipeline where Improved Backtracking CSP first guarantees 100% hard feasibility ($N_{\text{hard}} = 0$), followed by Simulated Annealing soft-constraint refinement (reducing penalties by up to $38\%$).
+### 2.Algorithms 
+- **Simulated Annealing :** Probabilistic local search with geometric temperature cooling ($T_{k+1} = \alpha T_k$) and single-move / pairwise session swap neighborhood operators.
+- **Hybrid CSP + Simulated Annealing:** Two-stage pipeline where Improved Backtracking CSP first guarantees 100% hard feasibility ($N_{\text{hard}} = 0$), followed by Simulated Annealing soft-constraint refinement (reducing penalties by up to $38\%$).
 
 ### 3. Strict Constraint Enforcement
 - **All 9 Hard Constraints (H1–H9):**
