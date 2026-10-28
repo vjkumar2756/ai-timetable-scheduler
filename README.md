@@ -4,15 +4,33 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.111-green.svg)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-18.3-61dafb.svg)](https://react.dev)
 [![Vite](https://img.shields.io/badge/Vite-5.3-purple.svg)](https://vitejs.dev)
-[![Status](https://img.shields.io/badge/Constraints-H1--H9%20Strict%20Zero-emerald.svg)]()
+[![Status](https://img.shields.io/badge/Constraints-H1--H9%20Strict%20Zero-emerald.svg)](https://github.com)
 
-> **Academic AI Assignment (B.Tech, Second Year):** Automated Constraint Satisfaction Problem (CSP) Timetable Generation and Local Search Engine with +12 Bonus Marks for Simulated Annealing & Hybrid Optimization.
+> **Automated Constraint Satisfaction Problem (CSP) Timetable Generator & Optimization Engine:** Generates clash-free academic timetables in seconds using systematic search and local search heuristics, complete with an interactive web dashboard.
+
+---
+
+## 🎯 What Problem Does This Project Solve?
+
+In universities and colleges, preparing a master weekly timetable manually is a slow, complex, and error-prone process. Academic coordinators typically spend weeks arranging lectures on spreadsheets while trying to balance teachers, student batches, rooms, and labs.
+
+### The Real-World Challenges:
+- **Clashes & Double-Bookings:** A faculty member or student class accidentally assigned to two different rooms at the same time.
+- **Resource & Room Mismatches:** Large classes assigned to rooms that are too small, or specialized lab sessions scheduled in regular lecture halls without computers.
+- **Academic Disruption:** Scattered timetables with 2-to-3-hour empty gaps for students, or faculty burdened with 4+ consecutive lecture hours.
+- **Mid-Semester Changes:** When a teacher takes leave or a lecture is missed, finding a conflict-free replacement slot manually causes a domino effect of new clashes.
+
+### How SchedulAI Solves It:
+- **Zero Clashes Guaranteed:** Formulates timetabling as a formal **Constraint Satisfaction Problem (CSP)**, strictly enforcing all 9 institutional hard constraints ($H1$–$H9$).
+- **Instant Generation:** Solves both small and large institutional timetables in seconds using AI search algorithms (Backtracking with MRV/FC, Min-Conflicts, and Hybrid Simulated Annealing).
+- **Quality Optimization:** Optimizes 5 soft preferences ($S1$–$S5$) to eliminate student idle gaps, spread subjects evenly across the week, and prevent teacher burnout.
+- **Operational Web Dashboard:** Provides real-time conflict-aware slot editing, automated missed-lecture rescheduling, and faculty class-swap validation.
 
 ---
 
 ## 🌟 Key Highlights & Features
 
-### 1. Mandatory AI Search Algorithms (Python)
+### 1. Core AI Search Algorithms (Python)
 - **Plain Backtracking (Baseline):** Chronological depth-first CSP search tracking node expansions and runtimes.
 - **Improved Backtracking (MRV + Forward Checking + Degree + LCV):**
   - **MRV (Minimum Remaining Values):** Dynamic variable selection (fail-first principle).
@@ -25,8 +43,8 @@
   - Plateau escape via Random Walk ($p = 0.08$) and Random Restarts.
   - Iteration tracking and Cost History generation.
 
-### 2.Algorithms 
-- **Simulated Annealing :** Probabilistic local search with geometric temperature cooling ($T_{k+1} = \alpha T_k$) and single-move / pairwise session swap neighborhood operators.
+### 2. Advanced & Optimization Algorithms
+- **Simulated Annealing:** Probabilistic local search with geometric temperature cooling ($T_{k+1} = \alpha T_k$) and single-move / pairwise session swap neighborhood operators.
 - **Hybrid CSP + Simulated Annealing:** Two-stage pipeline where Improved Backtracking CSP first guarantees 100% hard feasibility ($N_{\text{hard}} = 0$), followed by Simulated Annealing soft-constraint refinement (reducing penalties by up to $38\%$).
 
 ### 3. Strict Constraint Enforcement
@@ -60,7 +78,7 @@
 ## 📁 Repository Structure
 
 ```
-AI_asinment/
+ai-timetable-scheduler/
 ├── backend/
 │   ├── app/
 │   │   ├── api/routes/          # REST route handlers (schedule, operations, analytics, entities, io)
@@ -104,25 +122,25 @@ AI_asinment/
 ## 🚀 Quickstart Guide
 
 ### 1. Prerequisites
-- Python 3.10+ (tested on Python 3.14)
+- Python 3.10+ (tested on Python 3.13 & 3.14)
 - Node.js 18+ and npm
 
 ### 2. Backend Setup
 ```bash
-# Create and activate virtual environment
-python3 -m venv .venv
-source .venv/bin/activate
+# Navigate to project root
+cd ai-timetable-scheduler
 
 # Install dependencies
 pip install -r backend/requirements.txt
 
 # Start the FastAPI server
-python3 -m uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
+python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 Backend API will be accessible at `http://localhost:8000` with Swagger OpenAPI docs at `http://localhost:8000/docs`.
 
 ### 3. Frontend Setup
 ```bash
+# Navigate to frontend folder
 cd frontend
 
 # Install node dependencies
@@ -139,7 +157,7 @@ Frontend will be accessible at `http://localhost:5173`.
 
 Run the Pytest suite verifying all 9 hard constraints, integrity checks, and solvers:
 ```bash
-PYTHONPATH=. pytest backend/tests/test_constraints_and_solvers.py -v
+pytest backend/tests/test_constraints_and_solvers.py -v
 ```
 
 ---
@@ -148,7 +166,7 @@ PYTHONPATH=. pytest backend/tests/test_constraints_and_solvers.py -v
 
 To reproduce the 10-trial benchmark comparison across both datasets and generate the convergence and comparison plots:
 ```bash
-.venv/bin/python experiments/run_benchmarks.py
+python experiments/run_benchmarks.py
 ```
 Outputs generated in `experiments/results/`:
 - `benchmark_results.json`
@@ -165,35 +183,9 @@ Outputs generated in `experiments/results/`:
 | | Improved Backtracking (MRV+FC) | 0.1099s | 39 nodes | 0 | 571 | 100% |
 | | Min-Conflicts Local Search | 0.0058s | 1.2 iters | 0 | 502 | 100% |
 | | Simulated Annealing (Standalone) | 0.0948s | 2,020 iters | 0 | 520 | 100% |
-| | **Hybrid CSP + SA (Bonus)** | **0.1863s** | **2,020 iters** | **0** | **354.0** | **100%** |
+| | **Hybrid CSP + SA** | **0.1863s** | **2,020 iters** | **0** | **354.0** | **100%** |
 | **Large Dataset** | Plain Backtracking (Baseline) | 0.0313s | 104 nodes | 0 | 2,310 | 100% |
 | | **Improved Backtracking (MRV+FC)** | **3.4456s** | **104 nodes** | **0** | **1,482** | **100%** |
 | | Min-Conflicts Local Search | 0.0783s | 1.0 iters | 0 | 1,840 | 100% |
 | | Simulated Annealing (Standalone) | 0.2989s | 2,020 iters | 1.8 | 1,720 | 10% |
-| | **Hybrid CSP + SA (Bonus)** | **3.8833s** | **2,020 iters** | **0** | **1,083.7** | **100%** |
-
----
-
-## 🎓 Viva Demonstration Walkthrough
-
-1. **Dashboard Overview:** Navigate to `http://localhost:5173` to view live infrastructure stats, active faculty count, and health counters.
-2. **Preset Switching:** Click `Small (3C)` or `Large (8C)` in the sidebar to switch datasets in memory.
-3. **Automated Generation:**
-   - Go to **Generate Schedule**.
-   - Select **Improved Backtracking** or **Hybrid CSP + SA**.
-   - Click **Generate Timetable Now** to witness sub-second/multi-second solving with 0 hard violations.
-4. **Timetable Matrix Exploration:**
-   - Switch between **By Class**, **By Faculty**, and **By Room** views.
-   - Note the designated lunch break column and 2-hour laboratory consecutive blocks.
-5. **Conflict-Aware Manual Editing:**
-   - Click any session box to open the editor.
-   - Attempt to move the session to an occupied slot; observe immediate hard conflict diagnostics.
-   - Select a free slot and save; observe immediate timetable grid updates.
-6. **Operations & Rescheduling:**
-   - Go to **Operations & Rescheduling**.
-   - Cancel a session with a reason and view the audit notification.
-   - Click **Find Feasible Replacement Slots** to see conflict-free alternatives ranked by soft penalty.
-   - Test a **Teacher Class Swap** and review validation feedback.
-7. **Faculty Workload:** Open **Workload Analytics** to inspect capacity utilization progress bars and Chart.js distribution graphs.
-8. **Algorithm Benchmarks:** Open **Algorithm Comparison** to inspect the 10-trial comparison table, runtime bar charts, and the Min-Conflicts cost-vs-iterations convergence curve.
-9. **Export Timetable:** Click **Export CSV** in the Timetable Grid to download the schedule spreadsheet.
+| | **Hybrid CSP + SA** | **3.8833s** | **2,020 iters** | **0** | **1,083.7** | **100%** |
