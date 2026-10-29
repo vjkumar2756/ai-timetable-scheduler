@@ -15,7 +15,7 @@
   "teachers": [
     {
       "id": "T1",
-      "name": "Dr. Alan Turing",
+      "name": "Dr. Harsh Popat",
       "subject_ids": ["CS101", "CS104L"],
       "unavailable_slots": [{"day": "Mon", "period": 1}],
       "max_weekly_load": 15,
@@ -24,7 +24,7 @@
     },
     {
       "id": "T2",
-      "name": "Prof. Ada Lovelace",
+      "name": "Prof Hemang Saraiya",
       "subject_ids": ["CS102", "CS105L"],
       "unavailable_slots": [{"day": "Fri", "period": 6}],
       "max_weekly_load": 15,
@@ -33,7 +33,7 @@
     },
     {
       "id": "T3",
-      "name": "Dr. John von Neumann",
+      "name": "Dr Jitendra Rewar",
       "subject_ids": ["CS103"],
       "unavailable_slots": [],
       "max_weekly_load": 15,
@@ -42,7 +42,7 @@
     },
     {
       "id": "T4",
-      "name": "Dr. Claude Shannon",
+      "name": "Dr. Samarpit Yadav",
       "subject_ids": ["MA101"],
       "unavailable_slots": [{"day": "Wed", "period": 1}],
       "max_weekly_load": 15,
@@ -51,7 +51,7 @@
     },
     {
       "id": "T5",
-      "name": "Prof. Grace Hopper",
+      "name": "Prof Aaditya Sisodiya",
       "subject_ids": ["CS102", "CS103", "CS105L"],
       "unavailable_slots": [],
       "max_weekly_load": 15,
@@ -60,7 +60,7 @@
     },
     {
       "id": "T6",
-      "name": "Dr. Donald Knuth",
+      "name": "Dr. Happy Mandowara",
       "subject_ids": ["CS101", "MA101", "CS104L"],
       "unavailable_slots": [],
       "max_weekly_load": 15,

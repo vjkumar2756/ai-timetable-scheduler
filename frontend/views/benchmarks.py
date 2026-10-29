@@ -1,10 +1,9 @@
 """
 frontend/views/benchmarks.py
-Empirical Algorithm Benchmark Suite & Viva Defense Analysis.
+Empirical Algorithm Benchmark Suite.
 - Multi-trial performance comparison across Plain BT, Improved BT, Min-Conflicts, SA, and Hybrid.
 - Interactive Plotly execution time (log-scale), soft penalty minimization, and convergence graphs.
 - Head-to-head metrics table.
-- Written academic evaluation for project viva defense.
 """
 import os
 import json
@@ -28,7 +27,7 @@ def load_benchmark_data():
 
 def render_benchmarks_page():
     page_header(
-        title="Empirical Algorithm Comparison & Viva Defense",
+        title="Empirical Algorithm Comparison",
         subtitle="Empirical performance benchmarks across 10 seeded trials, convergence curves, and algorithmic trade-off analysis"
     )
 
@@ -126,10 +125,11 @@ def render_benchmarks_page():
             font=dict(color="#cbd5e1"),
             showlegend=False,
             margin=dict(l=10, r=10, t=20, b=30),
-            xaxis=dict(gridcolor="rgba(255,255,255,0.06)", tickangle=-20),
-            yaxis=dict(gridcolor="rgba(255,255,255,0.06)")
+            xaxis=dict(gridcolor="rgba(255,255,255,0.06)", tickangle=-20, fixedrange=True),
+            yaxis=dict(gridcolor="rgba(255,255,255,0.06)", fixedrange=True),
+            dragmode=False
         )
-        st.plotly_chart(fig_time, use_container_width=True)
+        st.plotly_chart(fig_time, use_container_width=True, config={"scrollZoom": False, "displayModeBar": False})
         st.markdown("</div>", unsafe_allow_html=True)
 
     with col_plot2:
@@ -152,10 +152,11 @@ def render_benchmarks_page():
             font=dict(color="#cbd5e1"),
             showlegend=False,
             margin=dict(l=10, r=10, t=20, b=30),
-            xaxis=dict(gridcolor="rgba(255,255,255,0.06)", tickangle=-20),
-            yaxis=dict(gridcolor="rgba(255,255,255,0.06)")
+            xaxis=dict(gridcolor="rgba(255,255,255,0.06)", tickangle=-20, fixedrange=True),
+            yaxis=dict(gridcolor="rgba(255,255,255,0.06)", fixedrange=True),
+            dragmode=False
         )
-        st.plotly_chart(fig_soft, use_container_width=True)
+        st.plotly_chart(fig_soft, use_container_width=True, config={"scrollZoom": False, "displayModeBar": False})
         st.markdown("</div>", unsafe_allow_html=True)
 
     # 4. Min-Conflicts Cost vs Iteration Convergence Curve (Official PDF Requirement)
@@ -169,8 +170,9 @@ def render_benchmarks_page():
         fig_conv.add_trace(go.Scatter(
             x=list(range(len(cost_history))),
             y=cost_history,
-            mode="lines",
+            mode="lines+markers",
             line=dict(color="#6366f1", width=2.5),
+            marker=dict(size=8, color="#38bdf8"),
             name="Cost Function Value"
         ))
         fig_conv.update_layout(
@@ -178,51 +180,11 @@ def render_benchmarks_page():
             paper_bgcolor="#121a30",
             font=dict(color="#cbd5e1"),
             margin=dict(l=20, r=20, t=20, b=30),
-            xaxis=dict(title="Iteration Step", gridcolor="rgba(255,255,255,0.06)"),
-            yaxis=dict(title="Total Cost (1000×Hard + Soft)", gridcolor="rgba(255,255,255,0.06)")
+            xaxis=dict(title="Iteration Step", gridcolor="rgba(255,255,255,0.06)", fixedrange=True),
+            yaxis=dict(title="Total Cost (1000×Hard + Soft)", gridcolor="rgba(255,255,255,0.06)", fixedrange=True),
+            dragmode=False
         )
-        st.plotly_chart(fig_conv, use_container_width=True)
+        st.plotly_chart(fig_conv, use_container_width=True, config={"scrollZoom": False, "displayModeBar": False})
+        if len(cost_history) <= 1:
+            st.caption("ℹ️ **Instant Convergence:** On this dataset, the greedy initial assignment satisfied all hard constraints immediately at step 0 ($H=0$, Total Cost = " + str(cost_history[0]) + "), leaving 0 clashes to repair.")
         st.markdown("</div>", unsafe_allow_html=True)
-
-    # 5. Written Academic Evaluation / Viva Defense Guide
-    st.markdown("<div class='schedulai-card' style='margin-top: 1.5rem;'>", unsafe_allow_html=True)
-    st.markdown("#### 🎓 Academic Analysis & Project Viva Defense Guide")
-
-    with st.expander("1. Systematic CSP: Why Heuristics (MRV + FC + Degree + LCV) Outperform Chronological DFS", expanded=True):
-        st.markdown(
-            """
-            - **Fail-First Principle (MRV + Degree):** Plain backtracking blindly assigns variables in arbitrary order. In contrast, **Minimum Remaining Values (MRV)** prioritizes the most constrained variable (fewest legal time slots). If a branch is doomed to fail, MRV forces the failure at the very top of the search tree, pruning exponential subtrees.
-            - **Forward Checking (FC):** Plain backtracking discovers clashes only after assigning all dependent variables. Forward checking prunes conflicting slots from all unassigned variables immediately after every assignment, preventing redundant depth exploration.
-            - **Empirical Evidence:** In our large benchmark instance, Forward Checking combined with MRV reduced search branch exploration while maintaining guaranteed mathematical completeness.
-            """
-        )
-
-    with st.expander("2. Local Search: Strengths and Limitations of Min-Conflicts", expanded=False):
-        st.markdown(
-            r"""
-            - **Why Min-Conflicts is Ultra-Fast on Sparse Graphs:** Rather than exploring a tree from scratch, Min-Conflicts begins with a complete (but clashing) assignment and greedily repairs variables currently involved in collisions. On sparse college instances, it resolves collisions in milliseconds.
-            - **Plateau & Local Optima Trap:** On dense schedules with tight teacher availability ($H_6$) or high room utilization ($>85\%$), greedy repairs can cycle between conflicting variables. We resolved this via **random-walk transitions ($p=0.08$)** and **random restarts**, ensuring escape from local minima.
-            """
-        )
-
-    with st.expander("3. Metaheuristics & Hybrid Decoupled Optimization (+6 Bonus Marks)", expanded=False):
-        st.markdown(
-            r"""
-            - **The Trade-Off in Pure Search:**
-              - Backtracking excels at hard feasibility ($H=0$) but stops at the first feasible leaf, yielding sub-optimal soft scores.
-              - Pure Simulated Annealing from random states can take thousands of iterations to resolve tight hard constraints.
-            - **The Hybrid Advantage:**
-              - **Stage 1 (Systematic CSP):** Improved Backtracking guarantees a 100% clash-free solution ($H_1\text{--}H_9 = 0$).
-              - **Stage 2 (Metaheuristic Polishing):** Simulated Annealing initializes from this feasible state and explores the neighborhood with hard-constraint preservation, minimizing faculty gap penalties ($S_1$) and preference violations ($S_4$) by over **30%**.
-            """
-        )
-
-    with st.expander("4. Third-Party Verification with 'python-constraint'", expanded=False):
-        st.markdown(
-            """
-            - To prove mathematical soundness and eliminate bias, [`experiments/cross_check.py`](file:///home/vijay/Desktop/ai%20system/ai-timetable-scheduler/experiments/cross_check.py) translates our timetable problem into the standard third-party `python-constraint` library.
-            - Solutions generated independently by `python-constraint` were fed into our `ConstraintValidator`, achieving **0 hard violations and 100% satisfiability agreement**.
-            """
-        )
-
-    st.markdown("</div>", unsafe_allow_html=True)

@@ -537,32 +537,64 @@ def render_operations_page():
                 st.markdown("<div class='schedulai-card'>", unsafe_allow_html=True)
                 st.markdown("##### 2. Second Faculty & Session (Partner)")
 
-                # Can be any teacher (including another teacher or same teacher moving their own sessions)
+                partner_options = ["all_compatible"] + teacher_keys
+                def partner_fmt(t):
+                    if t == "all_compatible":
+                        return "🌟 All Compatible Faculty (Auto-Filter)"
+                    return teachers_dict[t].get("name", t)
+
                 sel_t2 = st.selectbox(
                     "Partner Faculty",
-                    options=teacher_keys,
-                    index=(1 if len(teacher_keys) > 1 else 0),
-                    format_func=lambda t: teachers_dict[t].get("name", t),
+                    options=partner_options,
+                    index=0,
+                    format_func=partner_fmt,
                     key="swap_teacher_2"
                 )
 
+                only_possible = st.checkbox(
+                    "Show only feasible clash-free swaps (0 Clashes Guaranteed)",
+                    value=True,
+                    key="swap_filter_possible_only"
+                )
+
                 req_duration = sel_s1.get("duration", 1) if sel_s1 else 1
-                t2_sessions = [
-                    s for s in sessions
-                    if s.get("teacher_id") == sel_t2 and s.get("status") != "cancelled" and (sel_s1 is None or s.get("id") != sel_s1.get("id")) and s.get("duration", 1) == req_duration
-                ]
+
+                # Filter pool based on selected faculty
+                if sel_t2 == "all_compatible":
+                    candidate_pool = [
+                        s for s in sessions
+                        if s.get("status") != "cancelled" and (sel_s1 is None or s.get("id") != sel_s1.get("id")) and s.get("duration", 1) == req_duration
+                    ]
+                else:
+                    candidate_pool = [
+                        s for s in sessions
+                        if s.get("teacher_id") == sel_t2 and s.get("status") != "cancelled" and (sel_s1 is None or s.get("id") != sel_s1.get("id")) and s.get("duration", 1) == req_duration
+                    ]
+
+                # Filter to only feasible options if checked
+                if only_possible and sel_s1:
+                    feasible_pool = []
+                    for cand in candidate_pool:
+                        ok_v, _, _ = APIClient.validate_swap(sel_s1["id"], cand["id"])
+                        if ok_v:
+                            feasible_pool.append(cand)
+                    t2_sessions = feasible_pool
+                else:
+                    t2_sessions = candidate_pool
 
                 if not t2_sessions:
-                    st.info(f"No compatible {req_duration}-hour active sessions found for {teachers_dict.get(sel_t2, {}).get('name')}.")
+                    partner_label = "any faculty member" if sel_t2 == "all_compatible" else teachers_dict.get(sel_t2, {}).get("name", sel_t2)
+                    st.warning(f"⚠️ No clash-free {req_duration}-hour swap options found with {partner_label} for this session.")
                     st.markdown("</div>", unsafe_allow_html=True)
                     sel_s2 = None
                 else:
                     def s2_fmt(s):
                         c_name = classes_dict.get(s.get("class_id"), {}).get("name", s.get("class_id"))
-                        return f"{c_name} — {s.get('subject_name', s.get('subject_code'))} ({s.get('day')} P{s.get('period')}, {s.get('duration', 1)}h)"
+                        t_name = teachers_dict.get(s.get("teacher_id"), {}).get("name", s.get("teacher_id"))
+                        return f"✅ {c_name} — {s.get('subject_name', s.get('subject_code'))} | {t_name} ({s.get('day')} P{s.get('period')})"
 
                     sel_s2 = st.selectbox(
-                        "Session to Swap With",
+                        f"Session to Swap With ({len(t2_sessions)} Feasible Option{'s' if len(t2_sessions) != 1 else ''})",
                         options=t2_sessions,
                         format_func=s2_fmt,
                         key="swap_session_2"
@@ -698,3 +730,23 @@ def render_operations_page():
                     """,
                     unsafe_allow_html=True
                 )
+
+    # =========================================================================
+    # ON-DEMAND LIVE TIMETABLE GRID (Revealed only on button click)
+    # =========================================================================
+    if "show_ops_timetable" not in st.session_state:
+        st.session_state["show_ops_timetable"] = False
+
+    st.markdown("<div style='height: 1.25rem;'></div>", unsafe_allow_html=True)
+    ops_btn_label = "🙈 Hide Timetable Grid" if st.session_state["show_ops_timetable"] else "📅 View Updated Timetable Grid"
+    ops_btn_type = "secondary" if st.session_state["show_ops_timetable"] else "primary"
+
+    col_btn, _ = st.columns([1.5, 2.5])
+    with col_btn:
+        if st.button(ops_btn_label, key="btn_toggle_ops_timetable", type=ops_btn_type, use_container_width=True):
+            st.session_state["show_ops_timetable"] = not st.session_state["show_ops_timetable"]
+            st.rerun()
+
+    if st.session_state["show_ops_timetable"]:
+        from frontend.views.timetable_grid import render_timetable_grid
+        render_timetable_grid(embedded=True, key_prefix="ops_")

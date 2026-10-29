@@ -19,7 +19,8 @@ def enrich_session(sess) -> dict:
         "subject_type": sub.type if sub else "theory",
         "teacher_name": teacher.name if teacher else sess.teacher_id,
         "room_name": room.name if room else sess.room_id,
-        "room_type": room.type if room else "classroom"
+        "room_type": room.type if room else "classroom",
+        "cancellation_reason": (sess.original_slot.get("cancellation_reason") if sess.original_slot else None)
     }
 
 @router.post("/generate", response_model=APIResponse)

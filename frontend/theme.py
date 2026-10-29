@@ -3,6 +3,7 @@ frontend/theme.py
 Custom Dark & Light Mode Themes & Reusable HTML Component Renderers for SchedulAI.
 Supports instant seamless switching between Dark Navy and Modern Clean Light themes.
 """
+import os
 import streamlit as st
 
 def get_theme_css(mode: str = "dark") -> str:
@@ -366,13 +367,40 @@ def page_header(title: str, subtitle: str):
     h_html = f'<div style="margin-bottom: 1.5rem;"><h1 style="font-size: 1.65rem; font-weight: 800; margin: 0 0 0.3rem 0;">{title}</h1><p style="font-size: 0.88rem; color: var(--text-secondary); margin: 0;">{subtitle}</p></div>'
     st.markdown(h_html, unsafe_allow_html=True)
 
-def hero(title: str, description: str, badges: list = None):
-    """Renders the executive Hero Card."""
+def hero(title: str, description: str, badges: list = None, logo_path: str = None):
+    """Renders the executive Hero Card with optional integrated logo fitting cleanly inside."""
     badges_html = ""
     if badges:
         for b_text, b_variant in badges:
             badges_html += f'<span class="schedulai-badge badge-{b_variant}">{b_text}</span>'
-    h_html = f'<div class="schedulai-hero"><div style="margin-bottom: 0.75rem;">{badges_html}</div><h2 style="font-size: 1.5rem; font-weight: 800; margin: 0 0 0.5rem 0;">{title}</h2><p style="font-size: 0.9rem; line-height: 1.55; margin: 0; max-width: 850px; opacity: 0.92;">{description}</p></div>'
+
+    logo_html = ""
+    if logo_path and os.path.exists(logo_path):
+        import base64
+        with open(logo_path, "rb") as f:
+            b64 = base64.b64encode(f.read()).decode("utf-8")
+        logo_html = f'''
+        <div style="flex-shrink: 0; display: flex; align-items: center; justify-content: center; padding-left: 1.25rem;">
+            <div style="width: 135px; height: 135px; border-radius: 50%; background: #ffffff; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 24px rgba(0,0,0,0.3); border: 3px solid rgba(255,255,255,0.95); overflow: hidden; padding: 8px;">
+                <img src="data:image/png;base64,{b64}" alt="SchedulAI" style="width: 100%; height: 100%; object-fit: contain;" />
+            </div>
+        </div>
+        '''
+
+    if logo_html:
+        h_html = f'''
+        <div class="schedulai-hero" style="display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;">
+            <div style="flex: 1; min-width: 0;">
+                <div style="margin-bottom: 0.75rem;">{badges_html}</div>
+                <h2 style="font-size: 1.5rem; font-weight: 800; margin: 0 0 0.5rem 0;">{title}</h2>
+                <p style="font-size: 0.9rem; line-height: 1.55; margin: 0; max-width: 850px; opacity: 0.92;">{description}</p>
+            </div>
+            {logo_html}
+        </div>
+        '''
+    else:
+        h_html = f'<div class="schedulai-hero"><div style="margin-bottom: 0.75rem;">{badges_html}</div><h2 style="font-size: 1.5rem; font-weight: 800; margin: 0 0 0.5rem 0;">{title}</h2><p style="font-size: 0.9rem; line-height: 1.55; margin: 0; max-width: 850px; opacity: 0.92;">{description}</p></div>'
+
     st.markdown(h_html, unsafe_allow_html=True)
 
 def stat_card(label: str, value: str, icon: str = "📊", bg_color: str = "rgba(99, 102, 241, 0.15)", subtext: str = ""):

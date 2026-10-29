@@ -75,7 +75,7 @@ def render_entities_page():
                 tc1, tc2 = st.columns(2)
                 with tc1:
                     t_id = st.text_input("Faculty ID*", placeholder="e.g. T07")
-                    t_name = st.text_input("Full Name*", placeholder="e.g. Dr. Alan Turing")
+                    t_name = st.text_input("Full Name*", placeholder="e.g. Dr. Harsh Popat")
                     t_subs = st.text_input("Eligible Subject IDs (comma-separated)", placeholder="e.g. CS101, CS104L")
                 with tc2:
                     t_load = st.number_input("Max Weekly Teaching Load (Hours)", min_value=5, max_value=30, value=18)

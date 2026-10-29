@@ -109,10 +109,11 @@ def render_analytics_page():
                 font=dict(color="#cbd5e1", family="Inter, sans-serif"),
                 margin=dict(l=20, r=20, t=30, b=30),
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-                xaxis=dict(gridcolor="rgba(255,255,255,0.06)", tickangle=-25),
-                yaxis=dict(gridcolor="rgba(255,255,255,0.06)", title="Weekly Hours")
+                xaxis=dict(gridcolor="rgba(255,255,255,0.06)", tickangle=-25, fixedrange=True),
+                yaxis=dict(gridcolor="rgba(255,255,255,0.06)", title="Weekly Hours", fixedrange=True),
+                dragmode=False
             )
-            st.plotly_chart(fig_wl, use_container_width=True)
+            st.plotly_chart(fig_wl, use_container_width=True, config={"scrollZoom": False, "displayModeBar": False})
 
             # Faculty Workload Table
             st.markdown("<div class='schedulai-card'>", unsafe_allow_html=True)
@@ -165,10 +166,11 @@ def render_analytics_page():
                     paper_bgcolor="#121a30",
                     font=dict(color="#cbd5e1", family="Inter, sans-serif"),
                     margin=dict(l=20, r=20, t=20, b=20),
-                    xaxis=dict(gridcolor="rgba(255,255,255,0.06)", range=[0, 100]),
-                    yaxis=dict(gridcolor="rgba(255,255,255,0.06)")
+                    xaxis=dict(gridcolor="rgba(255,255,255,0.06)", range=[0, 100], fixedrange=True),
+                    yaxis=dict(gridcolor="rgba(255,255,255,0.06)", fixedrange=True),
+                    dragmode=False
                 )
-                st.plotly_chart(fig_rm, use_container_width=True)
+                st.plotly_chart(fig_rm, use_container_width=True, config={"scrollZoom": False, "displayModeBar": False})
 
             with col_chart2:
                 # Type Distribution Donut
@@ -187,9 +189,10 @@ def render_analytics_page():
                     paper_bgcolor="#121a30",
                     font=dict(color="#cbd5e1"),
                     margin=dict(l=10, r=10, t=20, b=20),
-                    legend=dict(orientation="h", yanchor="bottom", y=-0.1, xanchor="center", x=0.5)
+                    legend=dict(orientation="h", yanchor="bottom", y=-0.1, xanchor="center", x=0.5),
+                    dragmode=False
                 )
-                st.plotly_chart(fig_donut, use_container_width=True)
+                st.plotly_chart(fig_donut, use_container_width=True, config={"scrollZoom": False, "displayModeBar": False})
 
             # Facility Details Table
             st.markdown("<div class='schedulai-card'>", unsafe_allow_html=True)
@@ -255,9 +258,10 @@ def render_analytics_page():
                         paper_bgcolor="#121a30",
                         font=dict(color="#cbd5e1"),
                         margin=dict(l=10, r=10, t=10, b=10),
-                        legend=dict(orientation="h", yanchor="bottom", y=-0.25, xanchor="center", x=0.5)
+                        legend=dict(orientation="h", yanchor="bottom", y=-0.25, xanchor="center", x=0.5),
+                        dragmode=False
                     )
-                    st.plotly_chart(fig_pen, use_container_width=True)
+                    st.plotly_chart(fig_pen, use_container_width=True, config={"scrollZoom": False, "displayModeBar": False})
 
                 st.markdown("</div>", unsafe_allow_html=True)
 

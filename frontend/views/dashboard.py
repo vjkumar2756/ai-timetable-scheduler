@@ -2,6 +2,7 @@
 frontend/views/dashboard.py
 Academic Operations Dashboard Page with Expanded High-Impact Operations Suite.
 """
+import os
 import streamlit as st
 from frontend.theme import page_header, hero, stat_card
 from frontend.api_client import APIClient
@@ -12,7 +13,8 @@ def render_dashboard():
         subtitle="Real-time institutional scheduling health, infrastructure metrics, and autonomous engine status"
     )
 
-    # Hero Banner
+    # Hero Banner with Integrated Logo
+    dash_logo_path = os.path.join(os.path.dirname(__file__), "../../assets/logo.png")
     hero(
         title="SchedulAI Autonomous Timetable System",
         description=(
@@ -24,7 +26,8 @@ def render_dashboard():
             ("AI-Based Scheduler", "primary"),
             ("H1-H9 Strictly Enforced", "success"),
             ("Dual Benchmark Validated", "warning")
-        ]
+        ],
+        logo_path=dash_logo_path if os.path.exists(dash_logo_path) else None
     )
 
     # Fetch Real Data from API
@@ -49,75 +52,8 @@ def render_dashboard():
 
     st.markdown("<div style='height: 1.25rem;'></div>", unsafe_allow_html=True)
 
-    # Health & System Status Row
-    col_left, col_right = st.columns([1.1, 0.9])
-
-    with col_left:
-        sessions_count = len(sched.get("sessions", []))
-        hard_v = sched.get("hard_violations", 0)
-        soft_p = sched.get("soft_penalty", 0)
-        algo = sched.get("algorithm", "Improved Backtracking (MRV+LCV)")
-        runtime = sched.get("execution_time_seconds", 0.0)
-        feas_status = "Solvable & Feasible" if feas.get("feasible", False) else "Attention Needed"
-        feas_badge = "success" if feas.get("feasible", False) else "danger"
-        hard_color = "#10b981" if hard_v == 0 else "#f43f5e"
-        runtime_str = f"{round(runtime, 4)} s"
-
-        left_card_html = (
-            '<div class="schedulai-card">'
-            '<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">'
-            '<h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--text-main);">Schedule Status & Institutional Health</h3>'
-            '<span class="schedulai-badge badge-success">● Engine Live</span>'
-            '</div>'
-            '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; font-size: 0.86rem;">'
-            '<div style="background: var(--stat-sub-bg, rgba(255,255,255,0.02)); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-subtle);">'
-            '<div style="color: var(--text-secondary); font-size: 0.76rem;">Active Sessions</div>'
-            f'<div style="font-size: 1.15rem; font-weight: 800; color: var(--text-main);">{sessions_count} Periods</div>'
-            '</div>'
-            '<div style="background: var(--stat-sub-bg, rgba(255,255,255,0.02)); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-subtle);">'
-            '<div style="color: var(--text-secondary); font-size: 0.76rem;">Hard Violations</div>'
-            f'<div style="font-size: 1.15rem; font-weight: 800; color: {hard_color};">{hard_v} (H1-H9 Strict Zero)</div>'
-            '</div>'
-            '<div style="background: var(--stat-sub-bg, rgba(255,255,255,0.02)); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-subtle);">'
-            '<div style="color: var(--text-secondary); font-size: 0.76rem;">Soft Penalty Score</div>'
-            f'<div style="font-size: 1.15rem; font-weight: 800; color: #6366f1;">{soft_p} pts</div>'
-            '</div>'
-            '<div style="background: var(--stat-sub-bg, rgba(255,255,255,0.02)); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-subtle);">'
-            '<div style="color: var(--text-secondary); font-size: 0.76rem;">Last Solver Runtime</div>'
-            f'<div style="font-size: 1.15rem; font-weight: 800; color: #0284c7;">{runtime_str}</div>'
-            '</div>'
-            '</div>'
-            '<div style="margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--border-subtle); font-size: 0.84rem;">'
-            f'<div style="margin-bottom: 0.4rem; color: var(--text-main);"><b>Active Engine:</b> <span style="color: var(--text-secondary);">{algo}</span></div>'
-            f'<div style="color: var(--text-main);"><b>Mathematical Feasibility:</b> <span class="schedulai-badge badge-{feas_badge}">{feas_status}</span></div>'
-            '</div>'
-            '</div>'
-        )
-        st.markdown(left_card_html, unsafe_allow_html=True)
-
-    with col_right:
-        right_card_html = (
-            '<div class="schedulai-card">'
-            '<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">'
-            '<h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--text-main);">Institutional Compliance & Presets</h3>'
-            '<span class="schedulai-badge badge-primary">Academic CSP</span>'
-            '</div>'
-            '<div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1rem;">'
-            'SchedulAI guarantees zero professor double-booking, class room collisions, capacity overflows, and protected lunch breaks.'
-            '</div>'
-            '<div style="display: flex; flex-direction: column; gap: 0.45rem; font-size: 0.82rem; margin-bottom: 1rem;">'
-            '<div style="display: flex; justify-content: space-between;"><span style="color: var(--text-secondary);">Hard Constraints:</span><span style="color: #10b981; font-weight: 700;">H1–H9 Active</span></div>'
-            '<div style="display: flex; justify-content: space-between;"><span style="color: var(--text-secondary);">Soft Optimization:</span><span style="color: #6366f1; font-weight: 700;">S1–S5 Enabled</span></div>'
-            '<div style="display: flex; justify-content: space-between;"><span style="color: var(--text-secondary);">Room Feasibility:</span><span style="color: #d97706; font-weight: 700;">100% Demand Met</span></div>'
-            '</div>'
-            '</div>'
-        )
-        st.markdown(right_card_html, unsafe_allow_html=True)
-
-    st.markdown("<div style='height: 1.5rem;'></div>", unsafe_allow_html=True)
-
     # -------------------------------------------------------------------------
-    # EXPANDED & PROMINENT ACADEMIC OPERATIONS MODULES SUITE (FULL WIDTH GRID)
+    # 1. EXPANDED ACADEMIC OPERATIONS MODULES SUITE (FULL WIDTH GRID)
     # -------------------------------------------------------------------------
     st.markdown(
         """
@@ -233,3 +169,72 @@ def render_dashboard():
                 st.query_params["tab"] = mod["id"]
                 st.rerun()
             st.markdown("<div style='height: 0.75rem;'></div>", unsafe_allow_html=True)
+
+    st.markdown("<div style='height: 1.5rem;'></div>", unsafe_allow_html=True)
+
+    # -------------------------------------------------------------------------
+    # 2. HEALTH & SYSTEM STATUS ROW
+    # -------------------------------------------------------------------------
+    col_left, col_right = st.columns([1.1, 0.9])
+
+    with col_left:
+        sessions_count = len(sched.get("sessions", []))
+        hard_v = sched.get("hard_violations", 0)
+        soft_p = sched.get("soft_penalty", 0)
+        algo = sched.get("algorithm", "Improved Backtracking (MRV+LCV)")
+        runtime = sched.get("execution_time_seconds", 0.0)
+        feas_status = "Solvable & Feasible" if feas.get("feasible", False) else "Attention Needed"
+        feas_badge = "success" if feas.get("feasible", False) else "danger"
+        hard_color = "#10b981" if hard_v == 0 else "#f43f5e"
+        runtime_str = f"{round(runtime, 4)} s"
+
+        left_card_html = (
+            '<div class="schedulai-card">'
+            '<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">'
+            '<h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--text-main);">Schedule Status & Institutional Health</h3>'
+            '<span class="schedulai-badge badge-success">● Engine Live</span>'
+            '</div>'
+            '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; font-size: 0.86rem;">'
+            '<div style="background: var(--stat-sub-bg, rgba(255,255,255,0.02)); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-subtle);">'
+            '<div style="color: var(--text-secondary); font-size: 0.76rem;">Active Sessions</div>'
+            f'<div style="font-size: 1.15rem; font-weight: 800; color: var(--text-main);">{sessions_count} Periods</div>'
+            '</div>'
+            '<div style="background: var(--stat-sub-bg, rgba(255,255,255,0.02)); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-subtle);">'
+            '<div style="color: var(--text-secondary); font-size: 0.76rem;">Hard Violations</div>'
+            f'<div style="font-size: 1.15rem; font-weight: 800; color: {hard_color};">{hard_v} (H1-H9 Strict Zero)</div>'
+            '</div>'
+            '<div style="background: var(--stat-sub-bg, rgba(255,255,255,0.02)); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-subtle);">'
+            '<div style="color: var(--text-secondary); font-size: 0.76rem;">Soft Penalty Score</div>'
+            f'<div style="font-size: 1.15rem; font-weight: 800; color: #6366f1;">{soft_p} pts</div>'
+            '</div>'
+            '<div style="background: var(--stat-sub-bg, rgba(255,255,255,0.02)); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-subtle);">'
+            '<div style="color: var(--text-secondary); font-size: 0.76rem;">Last Solver Runtime</div>'
+            f'<div style="font-size: 1.15rem; font-weight: 800; color: #0284c7;">{runtime_str}</div>'
+            '</div>'
+            '</div>'
+            '<div style="margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--border-subtle); font-size: 0.84rem;">'
+            f'<div style="margin-bottom: 0.4rem; color: var(--text-main);"><b>Active Engine:</b> <span style="color: var(--text-secondary);">{algo}</span></div>'
+            f'<div style="color: var(--text-main);"><b>Mathematical Feasibility:</b> <span class="schedulai-badge badge-{feas_badge}">{feas_status}</span></div>'
+            '</div>'
+            '</div>'
+        )
+        st.markdown(left_card_html, unsafe_allow_html=True)
+
+    with col_right:
+        right_card_html = (
+            '<div class="schedulai-card">'
+            '<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">'
+            '<h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--text-main);">Institutional Compliance & Presets</h3>'
+            '<span class="schedulai-badge badge-primary">Academic CSP</span>'
+            '</div>'
+            '<div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1rem;">'
+            'SchedulAI guarantees zero professor double-booking, class room collisions, capacity overflows, and protected lunch breaks.'
+            '</div>'
+            '<div style="display: flex; flex-direction: column; gap: 0.45rem; font-size: 0.82rem; margin-bottom: 1rem;">'
+            '<div style="display: flex; justify-content: space-between;"><span style="color: var(--text-secondary);">Hard Constraints:</span><span style="color: #10b981; font-weight: 700;">H1–H9 Active</span></div>'
+            '<div style="display: flex; justify-content: space-between;"><span style="color: var(--text-secondary);">Soft Optimization:</span><span style="color: #6366f1; font-weight: 700;">S1–S5 Enabled</span></div>'
+            '<div style="display: flex; justify-content: space-between;"><span style="color: var(--text-secondary);">Room Feasibility:</span><span style="color: #d97706; font-weight: 700;">100% Demand Met</span></div>'
+            '</div>'
+            '</div>'
+        )
+        st.markdown(right_card_html, unsafe_allow_html=True)

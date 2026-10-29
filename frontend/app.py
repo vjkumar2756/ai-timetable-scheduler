@@ -11,10 +11,13 @@ from frontend.views.generate import render_generate_page
 from frontend.views.timetable_grid import render_timetable_grid
 from frontend.views.entities import render_entities_page
 
+# Locate Assets
+LOGO_PATH = os.path.join(os.path.dirname(__file__), "../assets/logo.png")
+
 # Configure Page Setting
 st.set_page_config(
     page_title="SchedulAI — AI College Timetable Scheduler",
-    page_icon="📅",
+    page_icon=LOGO_PATH if os.path.exists(LOGO_PATH) else "📅",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -40,23 +43,42 @@ st.query_params["theme"] = st.session_state["theme_mode"]
 # --- Sidebar ---
 with st.sidebar:
     # 1. Brand Logo & Title
-    st.markdown(
-        """
-        <div style="display: flex; align-items: center; gap: 0.75rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border-subtle); margin-bottom: 1.25rem;">
-            <div style="width: 38px; height: 38px; background: linear-gradient(135deg, #6366f1, #06b6d4); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: 0 0 15px rgba(99,102,241,0.35);">
-                📅
-            </div>
-            <div>
-                <div style="display: flex; align-items: center; gap: 0.35rem;">
-                    <span style="font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text-main);">SchedulAI</span>
-                    <span class="schedulai-badge badge-primary">CSP Engine</span>
+    if os.path.exists(LOGO_PATH):
+        import base64
+        with open(LOGO_PATH, "rb") as f:
+            side_b64 = base64.b64encode(f.read()).decode("utf-8")
+        st.markdown(
+            f"""
+            <div style="display: flex; justify-content: center; margin-bottom: 0.85rem;">
+                <div style="width: 110px; height: 110px; border-radius: 50%; background: #ffffff; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 18px rgba(0,0,0,0.25); border: 3px solid rgba(255,255,255,0.95); overflow: hidden; padding: 6px;">
+                    <img src="data:image/png;base64,{side_b64}" alt="SchedulAI" style="width: 100%; height: 100%; object-fit: contain;" />
                 </div>
-                <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 500;">AI College Scheduler</span>
             </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+            <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 0.85rem; border-bottom: 1px solid var(--border-subtle); margin-bottom: 1.25rem;">
+                <span class="schedulai-badge badge-primary">CSP Engine v1.0</span>
+                <span style="font-size: 0.74rem; color: var(--text-muted); font-weight: 600;">Autonomous Scheduler</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown(
+            """
+            <div style="display: flex; align-items: center; gap: 0.75rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border-subtle); margin-bottom: 1.25rem;">
+                <div style="width: 38px; height: 38px; background: linear-gradient(135deg, #6366f1, #06b6d4); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: 0 0 15px rgba(99,102,241,0.35);">
+                    📅
+                </div>
+                <div>
+                    <div style="display: flex; align-items: center; gap: 0.35rem;">
+                        <span style="font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text-main);">SchedulAI</span>
+                        <span class="schedulai-badge badge-primary">CSP Engine</span>
+                    </div>
+                    <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 500;">AI College Scheduler</span>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     # 2. Theme Mode Switcher (Dark / Light)
     st.markdown(
@@ -178,7 +200,7 @@ if active_tab != "dashboard":
             "generate": "Generate Schedule",
             "operations": "Operations & Rescheduling",
             "workload": "Faculty Workload Analytics",
-            "benchmarks": "Algorithm Comparison & Viva Defense",
+            "benchmarks": "Algorithm Comparison",
             "entities": "Manage Entities"
         }
         current_name = tab_names.get(active_tab, active_tab.title())

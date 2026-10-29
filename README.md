@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.png" alt="SchedulAI Logo" width="170" style="border-radius: 50%; background: #ffffff; box-shadow: 0 8px 30px rgba(0,0,0,0.25); border: 4px solid #ffffff;" />
+</p>
+
 # SchedulAI — AI-Based College Timetable Scheduler
 
 [![Python](https://img.shields.io/badge/Python-3.14-blue.svg)](https://python.org)

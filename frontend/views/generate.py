@@ -129,7 +129,18 @@ def render_generate_page():
         with st.spinner(f"Running {algo_choice.replace('_', ' ').title()} solver..."):
             ok, res_data, msg = APIClient.generate_schedule(payload)
 
-        if ok and res_data:
+        st.session_state["last_generation"] = {
+            "ok": ok,
+            "data": res_data if ok else None,
+            "msg": msg
+        }
+
+    # Render generation results if available
+    last_gen = st.session_state.get("last_generation")
+    if last_gen:
+        if last_gen.get("ok") and last_gen.get("data"):
+            res_data = last_gen["data"]
+            msg = last_gen.get("msg", "Success")
             st.success(f"Schedule Generation Complete: {msg}")
             
             # Key Results
@@ -162,16 +173,42 @@ def render_generate_page():
                     plot_bgcolor="#121a30",
                     font=dict(color="#f8fafc"),
                     margin=dict(l=40, r=20, t=30, b=40),
-                    xaxis_title="Iteration Step",
-                    yaxis_title="Institutional Cost Function",
-                    height=320
+                    xaxis=dict(title="Iteration Step", fixedrange=True),
+                    yaxis=dict(title="Institutional Cost Function", fixedrange=True),
+                    height=320,
+                    dragmode=False
                 )
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, use_container_width=True, config={"scrollZoom": False, "displayModeBar": False})
                 st.markdown("</div>", unsafe_allow_html=True)
 
             # Link to Timetable View
-            if st.button("👉 View Generated Timetable Grid"):
+            def navigate_to_timetable():
                 st.session_state["active_tab"] = "timetable"
-                st.rerun()
+                st.query_params["tab"] = "timetable"
+
+            # On-Demand Timetable Grid Toggle
+            if "show_gen_timetable" not in st.session_state:
+                st.session_state["show_gen_timetable"] = False
+
+            col_g1, col_g2 = st.columns([1.5, 1.5])
+            with col_g1:
+                g_btn_label = "🙈 Hide Generated Timetable" if st.session_state["show_gen_timetable"] else "📅 View Generated Timetable Grid"
+                g_btn_type = "secondary" if st.session_state["show_gen_timetable"] else "primary"
+                if st.button(g_btn_label, key="btn_toggle_gen_timetable", type=g_btn_type, use_container_width=True):
+                    st.session_state["show_gen_timetable"] = not st.session_state["show_gen_timetable"]
+                    st.rerun()
+
+            with col_g2:
+                st.button(
+                    "👉 Open Dedicated Timetable View",
+                    key="btn_view_generated_timetable_grid",
+                    type="secondary",
+                    use_container_width=True,
+                    on_click=navigate_to_timetable
+                )
+
+            if st.session_state["show_gen_timetable"]:
+                from frontend.views.timetable_grid import render_timetable_grid
+                render_timetable_grid(embedded=True, key_prefix="gen_")
         else:
-            st.error(f"Generation Failed: {msg}")
+            st.error(f"Generation Failed: {last_gen.get('msg', 'Unknown error')}")

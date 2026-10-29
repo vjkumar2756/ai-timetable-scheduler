@@ -182,12 +182,21 @@ class ImprovedBacktrackingSolver:
         var_map: Dict[str, LectureVariable]
     ) -> List[SlotValue]:
         """
-        Least Constraining Value (LCV) heuristic:
-        Orders values by the number of ruled-out choices for remaining unassigned variables.
+        Soft-Aware Least Constraining Value (LCV) heuristic:
+        1. Strictly optimizes S2: Prioritizes days where this subject is not yet scheduled for this class.
+        2. Orders by fewest ruled-out choices for remaining unassigned variables.
         """
         values = domains[var.id]
         if len(values) <= 1:
             return values
+
+        # S2: Track days where this class already has this non-lab subject scheduled
+        occupied_days = set()
+        if not var.is_lab:
+            for aid, aslot in assignment.items():
+                avar = var_map[aid]
+                if avar.class_id == var.class_id and avar.subject_id == var.subject_id:
+                    occupied_days.add(aslot.day)
 
         unassigned = [v for v in self.csp.variables if v.id not in assignment and v.id != var.id]
         var_occupied = lambda val: range(val.period, val.period + var.duration)
@@ -206,7 +215,12 @@ class ImprovedBacktrackingSolver:
                                 eliminated += 1
             return eliminated
 
-        return sorted(values, key=count_conflicts_caused)
+        def value_rank(val: SlotValue):
+            # Day repeat penalty (S2: avoid same subject twice on same day unless lab)
+            day_pen = 1 if val.day in occupied_days else 0
+            return (day_pen, count_conflicts_caused(val))
+
+        return sorted(values, key=value_rank)
 
     def _forward_check(
         self,

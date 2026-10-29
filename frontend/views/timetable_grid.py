@@ -11,11 +11,27 @@ import pandas as pd
 from frontend.theme import page_header
 from frontend.api_client import APIClient
 
-def render_timetable_grid():
-    page_header(
-        title="Institutional Timetable Matrix",
-        subtitle="Multi-dimensional schedule visualization with protected lunch periods and export options"
-    )
+def render_timetable_grid(embedded: bool = False, key_prefix: str = ""):
+    if not embedded:
+        page_header(
+            title="Institutional Timetable Matrix",
+            subtitle="Multi-dimensional schedule visualization with protected lunch periods and export options"
+        )
+    else:
+        st.markdown(
+            """
+            <div style="margin-top: 2rem; padding-top: 1.25rem; border-top: 1px solid var(--border-subtle); margin-bottom: 0.75rem;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 0.6rem;">
+                        <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: var(--text-main);">📅 Live Timetable Schedule Matrix</h3>
+                        <span class="schedulai-badge badge-primary">Auto-Sync</span>
+                    </div>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">Instantly reflects any cancellations, rescheduled slots, moves, or faculty swaps</span>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     # 1. Fetch current active timetable and metadata
     ok_sched, sched_data, msg = APIClient.get_active_schedule()
@@ -64,7 +80,7 @@ def render_timetable_grid():
         st.warning("⚠️ No active timetable sessions found in memory. Please generate a schedule or load preset data to view the timetable.")
         c_gen1, c_gen2 = st.columns(2)
         with c_gen1:
-            if st.button("⚡ Generate AI Timetable (Backtracking Solver)", type="primary", use_container_width=True):
+            if st.button("⚡ Generate AI Timetable (Backtracking Solver)", key=f"{key_prefix}btn_empty_gen", type="primary", use_container_width=True):
                 with st.spinner("Generating clash-free timetable..."):
                     ok, res, g_msg = APIClient.generate_schedule({"algorithm": "improved_backtracking"})
                     if ok:
@@ -73,7 +89,7 @@ def render_timetable_grid():
                     else:
                         st.error(f"Generation failed: {g_msg}")
         with c_gen2:
-            if st.button("📦 Load Preset & Generate Timetable", use_container_width=True):
+            if st.button("📦 Load Preset & Generate Timetable", key=f"{key_prefix}btn_empty_preset", use_container_width=True):
                 with st.spinner("Loading preset..."):
                     ok, _, _ = APIClient.load_preset("small")
                     if ok:
@@ -101,9 +117,10 @@ def render_timetable_grid():
         view_mode = st.segmented_control(
             "View Perspective:",
             options=["Class / Batch", "Teacher / Faculty", "Room / Lab"],
-            default="Room / Lab" if st.session_state.get("last_view_mode") == "Room / Lab" else "Class / Batch"
+            default="Room / Lab" if st.session_state.get(f"{key_prefix}last_view_mode") == "Room / Lab" else "Class / Batch",
+            key=f"{key_prefix}view_mode_control"
         ) or "Class / Batch"
-        st.session_state["last_view_mode"] = view_mode
+        st.session_state[f"{key_prefix}last_view_mode"] = view_mode
 
     with t_row2:
         st.markdown("<p style='font-size: 0.8rem; font-weight: 700; color: #94a3b8; margin-bottom: 0.25rem;'>📥 Export Options</p>", unsafe_allow_html=True)
@@ -115,6 +132,7 @@ def render_timetable_grid():
                 data=csv_bytes,
                 file_name="schedulai_timetable.csv",
                 mime="text/csv",
+                key=f"{key_prefix}dl_csv",
                 use_container_width=True,
                 help="Download full CSV"
             )
@@ -125,6 +143,7 @@ def render_timetable_grid():
                 data=excel_bytes,
                 file_name="schedulai_timetable.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                key=f"{key_prefix}dl_excel",
                 use_container_width=True,
                 help="Download multi-sheet Excel file"
             )
@@ -135,6 +154,7 @@ def render_timetable_grid():
                 data=pdf_bytes,
                 file_name="schedulai_timetable.pdf",
                 mime="application/pdf",
+                key=f"{key_prefix}dl_pdf",
                 use_container_width=True,
                 help="Download printable landscape PDF"
             )
@@ -146,7 +166,8 @@ def render_timetable_grid():
             "Select Student Class / Cohort 🔒 (Fixed / Click to View):",
             options=class_options,
             default=class_options[0] if class_options else None,
-            format_func=lambda cid: f"🎓 {classes_dict[cid].get('name', cid)} ({classes_dict[cid].get('strength', 0)} Students)"
+            format_func=lambda cid: f"🎓 {classes_dict[cid].get('name', cid)} ({classes_dict[cid].get('strength', 0)} Students)",
+            key=f"{key_prefix}pills_class"
         ) or (class_options[0] if class_options else None)
     elif view_mode == "Teacher / Faculty":
         teacher_options = list(teachers_dict.keys())
@@ -154,7 +175,8 @@ def render_timetable_grid():
             "Select Faculty Member 🔒 (Fixed / Click to View):",
             options=teacher_options,
             default=teacher_options[0] if teacher_options else None,
-            format_func=lambda tid: f"👨‍🏫 {teachers_dict[tid].get('name', tid)} ({teachers_dict[tid].get('max_weekly_load', 0)}h/wk)"
+            format_func=lambda tid: f"👨‍🏫 {teachers_dict[tid].get('name', tid)} ({teachers_dict[tid].get('max_weekly_load', 0)}h/wk)",
+            key=f"{key_prefix}pills_teacher"
         ) or (teacher_options[0] if teacher_options else None)
     else:
         room_options = list(rooms_dict.keys())
@@ -162,7 +184,8 @@ def render_timetable_grid():
             "Select Room or Lab 🔒 (Fixed / Click to View):",
             options=room_options,
             default=room_options[0] if room_options else None,
-            format_func=lambda rid: f"🏛️ {rooms_dict[rid].get('name', rid)} ({rooms_dict[rid].get('type', 'classroom').title()}, Cap: {rooms_dict[rid].get('capacity', 0)})"
+            format_func=lambda rid: f"🏛️ {rooms_dict[rid].get('name', rid)} ({rooms_dict[rid].get('type', 'classroom').title()}, Cap: {rooms_dict[rid].get('capacity', 0)})",
+            key=f"{key_prefix}pills_room"
         ) or (room_options[0] if room_options else None)
 
     # -------------------------------------------------------------------------
@@ -184,15 +207,21 @@ def render_timetable_grid():
         lunch_period = default_lunch
         filter_fn = lambda s: s.get("room_id") == selected_id
 
-    # Filter sessions for selected entity
-    entity_sessions = [s for s in sessions if filter_fn(s) and s.get("status") != "cancelled"]
-    session_count = len(entity_sessions)
+    # Filter sessions for selected entity (both active and cancelled)
+    all_entity_sessions = [s for s in sessions if filter_fn(s)]
+    active_sessions = [s for s in all_entity_sessions if s.get("status") != "cancelled"]
+    cancelled_sessions = [s for s in all_entity_sessions if s.get("status") == "cancelled"]
+    session_count = len(active_sessions)
+    cancelled_count = len(cancelled_sessions)
 
     # Banner displayed via columns to keep it cleanly in Streamlit layout
     b_col1, b_col2 = st.columns([1.5, 1.5])
     with b_col1:
         st.markdown(f"### {title_text}")
-        st.caption(f"Showing {session_count} scheduled sessions • Protected lunch period (Period {lunch_period})")
+        status_note = f"Showing {session_count} scheduled sessions"
+        if cancelled_count > 0:
+            status_note += f" • <span style='color: #ef4444; font-weight: 700;'>{cancelled_count} Cancelled Session(s)</span>"
+        st.caption(f"{status_note} • Protected lunch period (Period {lunch_period})", unsafe_allow_html=True)
     with b_col2:
         st.markdown(
             f"""
@@ -209,7 +238,8 @@ def render_timetable_grid():
     # Build Slot Map: gridMap[day][period] = session_info
     # -------------------------------------------------------------------------
     grid_map = {d: {} for d in days}
-    for s in entity_sessions:
+    # 1. Place active sessions first
+    for s in active_sessions:
         day = s.get("day")
         p_start = s.get("period")
         dur = s.get("duration", 1)
@@ -218,6 +248,19 @@ def render_timetable_grid():
             if dur > 1:
                 for off in range(1, dur):
                     grid_map[day][p_start + off] = {**s, "is_extension": True}
+
+    # 2. Place cancelled sessions if slot is free
+    for s in cancelled_sessions:
+        day = s.get("day")
+        p_start = s.get("period")
+        dur = s.get("duration", 1)
+        if day in grid_map and p_start:
+            if p_start not in grid_map[day]:
+                grid_map[day][p_start] = {**s, "is_extension": False}
+                if dur > 1:
+                    for off in range(1, dur):
+                        if (p_start + off) not in grid_map[day]:
+                            grid_map[day][p_start + off] = {**s, "is_extension": True}
 
     # -------------------------------------------------------------------------
     # Build Matrix Grid HTML for components.html (100% Isolated Visual Webpage)
@@ -250,6 +293,7 @@ def render_timetable_grid():
             sub_code = sub_obj.get("code", item.get("subject_code", sub_id))
             sub_name = sub_obj.get("name", item.get("subject_name", sub_id))
             is_lab = (sub_obj.get("type") == "lab") or (item.get("subject_type") == "lab")
+            is_cancelled = (item.get("status") == "cancelled")
 
             tea_obj = teachers_dict.get(item.get("teacher_id"), {})
             tea_name = tea_obj.get("name", item.get("teacher_name", item.get("teacher_id")))
@@ -262,22 +306,26 @@ def render_timetable_grid():
             rm_name = rm_obj.get("name", item.get("room_name", item.get("room_id")))
             rm_short = rm_name.split("(")[0].strip() if rm_name else "Room"
 
+            # Check if this is a cancelled session
+            if is_cancelled:
+                cancel_reason = item.get("cancellation_reason") or (item.get("original_slot", {}).get("cancellation_reason") if isinstance(item.get("original_slot"), dict) else None) or "Faculty Leave"
+                card_html = f"""<div class="session-box cancelled" title="Cancelled: {cancel_reason}"><div class="session-header"><span class="session-code" style="text-decoration: line-through; opacity: 0.65;">{sub_code}</span><span class="badge badge-cancelled">🚫 CANCELLED</span></div><div class="session-name" style="text-decoration: line-through; opacity: 0.75;" title="{sub_name}">{sub_name}</div><div class="session-faculty" style="text-decoration: line-through; opacity: 0.65;">👨‍🏫 {tea_name}</div><div class="session-footer"><span style="color: #ef4444; font-weight: 600; font-size: 0.65rem;">🚫 {cancel_reason[:18]}</span><span>🏛️ {rm_short}</span></div></div>"""
             # Check if this is the multi-period continuation
-            if item.get("is_extension"):
-                card_html = f"""<div class="session-box lab" style="opacity: 0.88;"><div class="session-header"><span class="session-code">{sub_code} (Cont.)</span><span class="badge badge-lab">Lab 2/2</span></div><div class="session-name" title="{sub_name}">{sub_name}</div><div class="session-footer"><span>🏛️ {rm_short}</span><span style="font-size: 0.65rem; color: #67e8f9; font-weight: 600;">Continuation</span></div></div>"""
+            elif item.get("is_extension"):
+                card_html = f"""<div class="session-box lab" style="opacity: 0.88;"><div class="session-header"><span class="session-code">{sub_code} (Cont.)</span><span class="badge badge-lab">Lab 2/2</span></div><div class="session-name" title="{sub_name}">{sub_name}</div><div class="session-faculty">👨‍🏫 {tea_name}</div><div class="session-footer"><span>🏛️ {rm_short}</span><span style="font-size: 0.65rem; color: #67e8f9; font-weight: 600;">Continuation</span></div></div>"""
             else:
                 box_cls = "lab" if is_lab else "theory"
                 badge_cls = "badge-lab" if is_lab else "badge-theory"
                 badge_lbl = "LAB (2h)" if is_lab else "THEORY"
 
                 if view_mode == "Teacher / Faculty":
-                    foot_left = f"👥 {cls_name}"
+                    fac_line = f"""<div class="session-faculty" title="Class: {cls_name}">👥 {cls_name}</div>"""
+                    foot_extra = f"""<span>👥 {cls_name}</span>"""
                 else:
-                    foot_left = f"👤 {tea_short}"
+                    fac_line = f"""<div class="session-faculty" title="Faculty: {tea_name}">👨‍🏫 {tea_name}</div>"""
+                    foot_extra = ""
 
-                foot_right = f"🏛️ {rm_short}"
-
-                card_html = f"""<div class="session-box {box_cls}"><div class="session-header"><span class="session-code">{sub_code}</span><span class="badge {badge_cls}">{badge_lbl}</span></div><div class="session-name" title="{sub_name}">{sub_name}</div><div class="session-footer"><span>{foot_left}</span><span>{foot_right}</span></div></div>"""
+                card_html = f"""<div class="session-box {box_cls}"><div class="session-header"><span class="session-code">{sub_code}</span><span class="badge {badge_cls}">{badge_lbl}</span></div><div class="session-name" title="{sub_name}">{sub_name}</div>{fac_line}<div class="session-footer"><span>🏛️ {rm_name}</span>{foot_extra}</div></div>"""
 
             row_tds += f'<td class="slot-cell">{card_html}</td>'
 
@@ -295,18 +343,21 @@ def render_timetable_grid():
         .timetable-grid th.day-col { width: 85px; background: #f1f5f9; color: #0f172a; font-weight: 800; }
         .timetable-grid th.lunch-col { width: 95px; color: #b45309; }
         .day-cell { width: 85px; background: #f8fafc; color: #0f172a; font-weight: 800; text-align: center; vertical-align: middle; font-size: 0.88rem; border: 1px solid rgba(0, 0, 0, 0.07); }
-        .slot-cell { border: 1px solid rgba(0, 0, 0, 0.07); padding: 6px; vertical-align: top; height: 108px; background: #ffffff; transition: background 0.15s ease; }
+        .slot-cell { border: 1px solid rgba(0, 0, 0, 0.07); padding: 6px; vertical-align: top; height: 120px; background: #ffffff; transition: background 0.15s ease; }
         .slot-cell:hover { background: #f8fafc; }
         .session-box { height: 100%; border-radius: 8px; padding: 7px 9px; display: flex; flex-direction: column; justify-content: space-between; background: linear-gradient(145deg, #ffffff, #f8fafc); border: 1px solid rgba(0, 0, 0, 0.09); transition: transform 0.15s ease, box-shadow 0.15s ease; cursor: default; }
         .session-box:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08); }
         .session-box.theory { border-left: 3.5px solid #4f46e5; background: linear-gradient(145deg, #eef2ff, #ffffff); }
         .session-box.lab { border-left: 3.5px solid #0891b2; background: linear-gradient(145deg, #ecfeff, #ffffff); }
+        .session-box.cancelled { border-left: 3.5px solid #ef4444; border: 1px dashed rgba(239, 68, 68, 0.45); background: linear-gradient(145deg, #fef2f2, #ffffff); opacity: 0.92; }
         .session-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
         .session-code { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 0.82rem; color: #0f172a; }
         .badge { font-size: 0.65rem; font-weight: 700; padding: 1.5px 6px; border-radius: 9999px; text-transform: uppercase; }
         .badge-theory { background: rgba(79, 70, 229, 0.12); color: #4338ca; border: 1px solid rgba(79, 70, 229, 0.3); }
         .badge-lab { background: rgba(8, 145, 178, 0.12); color: #0e7490; border: 1px solid rgba(8, 145, 178, 0.3); }
-        .session-name { font-size: 0.74rem; color: #334155; font-weight: 600; line-height: 1.25; margin: 2px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .badge-cancelled { background: rgba(239, 68, 68, 0.12); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.35); }
+        .session-name { font-size: 0.74rem; color: #334155; font-weight: 700; line-height: 1.25; margin: 2px 0 1px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .session-faculty { font-size: 0.72rem; color: #0284c7; font-weight: 600; margin-bottom: 3px; display: flex; align-items: center; gap: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .session-footer { display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; color: #64748b; margin-top: auto; padding-top: 3px; border-top: 1px solid rgba(0, 0, 0, 0.06); }
         .lunch-slot { width: 95px; border: 1px dashed rgba(245, 158, 11, 0.4); background: repeating-linear-gradient(-45deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.1) 8px, rgba(245, 158, 11, 0.03) 8px, rgba(245, 158, 11, 0.03) 16px); color: #b45309; font-weight: 700; font-size: 0.76rem; text-align: center; vertical-align: middle; letter-spacing: 0.06em; padding: 6px; line-height: 1.4; }
         .free-slot { height: 100%; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 0.72rem; font-style: italic; }
@@ -320,18 +371,21 @@ def render_timetable_grid():
         .timetable-grid th.day-col { width: 85px; background: #060911; color: #f1f5f9; font-weight: 800; }
         .timetable-grid th.lunch-col { width: 95px; color: #fbbf24; }
         .day-cell { width: 85px; background: #090d16; color: #f8fafc; font-weight: 800; text-align: center; vertical-align: middle; font-size: 0.88rem; border: 1px solid rgba(255, 255, 255, 0.07); }
-        .slot-cell { border: 1px solid rgba(255, 255, 255, 0.07); padding: 6px; vertical-align: top; height: 108px; background: rgba(15, 23, 42, 0.6); transition: background 0.15s ease; }
+        .slot-cell { border: 1px solid rgba(255, 255, 255, 0.07); padding: 6px; vertical-align: top; height: 120px; background: rgba(15, 23, 42, 0.6); transition: background 0.15s ease; }
         .slot-cell:hover { background: rgba(30, 41, 59, 0.45); }
         .session-box { height: 100%; border-radius: 8px; padding: 7px 9px; display: flex; flex-direction: column; justify-content: space-between; background: linear-gradient(145deg, #1e293b, #111827); border: 1px solid rgba(255, 255, 255, 0.08); transition: transform 0.15s ease, box-shadow 0.15s ease; cursor: default; }
         .session-box:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5); }
         .session-box.theory { border-left: 3.5px solid #6366f1; background: linear-gradient(145deg, rgba(30, 41, 69, 0.9), rgba(17, 24, 39, 0.95)); }
         .session-box.lab { border-left: 3.5px solid #06b6d4; background: linear-gradient(145deg, rgba(14, 53, 73, 0.9), rgba(17, 24, 39, 0.95)); }
+        .session-box.cancelled { border-left: 3.5px solid #ef4444; border: 1px dashed rgba(239, 68, 68, 0.45); background: linear-gradient(145deg, rgba(80, 15, 15, 0.4), rgba(20, 24, 39, 0.95)); opacity: 0.92; }
         .session-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
         .session-code { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 0.82rem; color: #ffffff; }
         .badge { font-size: 0.65rem; font-weight: 700; padding: 1.5px 6px; border-radius: 9999px; text-transform: uppercase; }
         .badge-theory { background: rgba(99, 102, 241, 0.18); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.35); }
         .badge-lab { background: rgba(6, 182, 212, 0.18); color: #67e8f9; border: 1px solid rgba(6, 182, 212, 0.35); }
-        .session-name { font-size: 0.74rem; color: #cbd5e1; font-weight: 500; line-height: 1.25; margin: 2px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .badge-cancelled { background: rgba(239, 68, 68, 0.22); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.45); }
+        .session-name { font-size: 0.74rem; color: #cbd5e1; font-weight: 700; line-height: 1.25; margin: 2px 0 1px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .session-faculty { font-size: 0.72rem; color: #38bdf8; font-weight: 600; margin-bottom: 3px; display: flex; align-items: center; gap: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .session-footer { display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; color: #94a3b8; margin-top: auto; padding-top: 3px; border-top: 1px solid rgba(255, 255, 255, 0.06); }
         .lunch-slot { width: 95px; border: 1px dashed rgba(245, 158, 11, 0.35); background: repeating-linear-gradient(-45deg, rgba(245, 158, 11, 0.08), rgba(245, 158, 11, 0.08) 8px, rgba(245, 158, 11, 0.02) 8px, rgba(245, 158, 11, 0.02) 16px); color: #fbbf24; font-weight: 700; font-size: 0.76rem; text-align: center; vertical-align: middle; letter-spacing: 0.06em; padding: 6px; line-height: 1.4; }
         .free-slot { height: 100%; display: flex; align-items: center; justify-content: center; color: rgba(255, 255, 255, 0.18); font-size: 0.72rem; font-style: italic; }
@@ -366,5 +420,5 @@ def render_timetable_grid():
 </html>
 """
     # Render through components.html with exact pixel height - zero markdown parser interference!
-    grid_height = 60 + (len(days) * 114)
+    grid_height = 65 + (len(days) * 126)
     components.html(full_html_doc, height=grid_height, scrolling=False)

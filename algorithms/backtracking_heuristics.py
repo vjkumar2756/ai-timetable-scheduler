@@ -112,8 +112,19 @@ class BacktrackingWithHeuristicsSolver(BaseSolver):
 
     def _order_domain_values(self, var, domains, assignment, var_map):
         values = domains[var.id]
-        if not self.use_lcv or len(values) <= 1:
+        if len(values) <= 1:
             return values
+
+        # S2: Track days where this class already has this non-lab subject scheduled
+        occupied_days = set()
+        if not var.is_lab:
+            for aid, aslot in assignment.items():
+                avar = var_map[aid]
+                if avar.class_id == var.class_id and avar.subject_id == var.subject_id:
+                    occupied_days.add(aslot.day)
+
+        if not self.use_lcv:
+            return sorted(values, key=lambda val: (1 if val.day in occupied_days else 0))
 
         unassigned = [v for v in self.csp.variables if v.id not in assignment and v.id != var.id]
         var_occ = lambda val: range(val.period, val.period + var.duration)
@@ -129,7 +140,12 @@ class BacktrackingWithHeuristicsSolver(BaseSolver):
                                 elim += 1
             return elim
 
-        return sorted(values, key=eliminated_choices)
+        def value_rank(val):
+            # Day repeat penalty (S2: avoid same subject twice on same day unless lab)
+            day_pen = 1 if val.day in occupied_days else 0
+            return (day_pen, eliminated_choices(val))
+
+        return sorted(values, key=value_rank)
 
     def _forward_check(self, var, val, domains, assignment, var_map):
         if not self.use_fc:
