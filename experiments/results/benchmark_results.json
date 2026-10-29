@@ -2,7 +2,7 @@
   "small": {
     "plain_backtracking": {
       "algorithm": "Plain Backtracking (Baseline)",
-      "time_taken_seconds": 0.0021,
+      "time_taken_seconds": 0.0024,
       "nodes_expanded": 39,
       "hard_violations": 0,
       "soft_penalty": 676,
@@ -12,7 +12,7 @@
     },
     "improved_backtracking": {
       "algorithm": "Improved Backtracking (MRV+FC+Degree+LCV)",
-      "time_taken_seconds": 0.1099,
+      "time_taken_seconds": 0.1007,
       "nodes_expanded": 39,
       "hard_violations": 0,
       "soft_penalty": 571,
@@ -22,7 +22,7 @@
     },
     "min_conflicts": {
       "algorithm": "Min-Conflicts Local Search",
-      "time_taken_seconds": 0.0058,
+      "time_taken_seconds": 0.0052,
       "nodes_expanded": 1,
       "hard_violations": 0,
       "soft_penalty": 526.1,
@@ -32,7 +32,7 @@
     },
     "simulated_annealing": {
       "algorithm": "Simulated Annealing (Bonus)",
-      "time_taken_seconds": 0.0948,
+      "time_taken_seconds": 0.089,
       "nodes_expanded": 2020,
       "hard_violations": 0,
       "soft_penalty": 352.0,
@@ -42,7 +42,7 @@
     },
     "hybrid": {
       "algorithm": "Hybrid CSP + SA (Bonus)",
-      "time_taken_seconds": 0.1863,
+      "time_taken_seconds": 0.1758,
       "nodes_expanded": 1940,
       "hard_violations": 0,
       "soft_penalty": 354.0,
@@ -54,7 +54,7 @@
   "large": {
     "plain_backtracking": {
       "algorithm": "Plain Backtracking (Baseline)",
-      "time_taken_seconds": 0.0313,
+      "time_taken_seconds": 0.0292,
       "nodes_expanded": 104,
       "hard_violations": 0,
       "soft_penalty": 2310,
@@ -64,7 +64,7 @@
     },
     "improved_backtracking": {
       "algorithm": "Improved Backtracking (MRV+FC+Degree+LCV)",
-      "time_taken_seconds": 3.4456,
+      "time_taken_seconds": 3.1961,
       "nodes_expanded": 104,
       "hard_violations": 0,
       "soft_penalty": 1482,
@@ -74,7 +74,7 @@
     },
     "min_conflicts": {
       "algorithm": "Min-Conflicts Local Search",
-      "time_taken_seconds": 0.0783,
+      "time_taken_seconds": 0.0748,
       "nodes_expanded": 1,
       "hard_violations": 0,
       "soft_penalty": 1438.5,
@@ -84,7 +84,7 @@
     },
     "simulated_annealing": {
       "algorithm": "Simulated Annealing (Bonus)",
-      "time_taken_seconds": 0.2989,
+      "time_taken_seconds": 0.2827,
       "nodes_expanded": 2020,
       "hard_violations": 1,
       "soft_penalty": 1096.3,
@@ -94,7 +94,7 @@
     },
     "hybrid": {
       "algorithm": "Hybrid CSP + SA (Bonus)",
-      "time_taken_seconds": 3.8833,
+      "time_taken_seconds": 3.4585,
       "nodes_expanded": 1940,
       "hard_violations": 0,
       "soft_penalty": 1083.7,

@@ -11,6 +11,16 @@ def get_workload_analytics():
     data = AnalyticsService.get_teacher_workload_analytics()
     return APIResponse(success=True, message="Teacher workload statistics", data=data)
 
+@router.get("/rooms", response_model=APIResponse)
+def get_room_analytics():
+    data = AnalyticsService.get_room_analytics()
+    return APIResponse(success=True, message="Room utilization statistics", data=data)
+
+@router.get("/quality", response_model=APIResponse)
+def get_quality_analytics():
+    data = AnalyticsService.get_constraint_quality_analytics()
+    return APIResponse(success=True, message="Schedule quality and constraint compliance statistics", data=data)
+
 @router.get("/overview", response_model=APIResponse)
 def get_institutional_overview():
     data = AnalyticsService.get_institutional_overview()

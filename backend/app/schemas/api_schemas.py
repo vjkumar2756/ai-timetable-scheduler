@@ -12,6 +12,7 @@ class ManualEditRequest(BaseModel):
     target_period: int
     target_room_id: Optional[str] = None
     target_teacher_id: Optional[str] = None
+    apply_anyway: bool = False
 
 class CancelSessionRequest(BaseModel):
     session_id: str

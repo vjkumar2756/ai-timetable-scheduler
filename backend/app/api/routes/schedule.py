@@ -40,7 +40,12 @@ def generate_schedule(req: GenerateRequest):
         message=f"Timetable generated successfully using {result.algorithm}",
         data={
             **result.to_dict(),
-            "sessions": [enrich_session(s) for s in db_store.sessions.values()]
+            "sessions": [enrich_session(s) for s in db_store.sessions.values()],
+            "classes": [c.model_dump() for c in db_store.classes.values()],
+            "teachers": [t.model_dump() for t in db_store.teachers.values()],
+            "rooms": [r.model_dump() for r in db_store.rooms.values()],
+            "subjects": [s.model_dump() for s in db_store.subjects.values()],
+            "settings": db_store.settings.model_dump() if db_store.settings else {}
         }
     )
 
@@ -67,13 +72,18 @@ def get_current_schedule(
         data={
             "metadata": db_store.current_schedule_metadata,
             "total_sessions": len(sessions),
-            "sessions": [enrich_session(s) for s in sessions]
+            "sessions": [enrich_session(s) for s in sessions],
+            "classes": [c.model_dump() for c in db_store.classes.values()],
+            "teachers": [t.model_dump() for t in db_store.teachers.values()],
+            "rooms": [r.model_dump() for r in db_store.rooms.values()],
+            "subjects": [s.model_dump() for s in db_store.subjects.values()],
+            "settings": db_store.settings.model_dump() if db_store.settings else {}
         }
     )
 
 @router.post("/validate-edit", response_model=APIResponse)
 def validate_manual_edit(req: ManualEditRequest):
-    is_valid, violations = ScheduleService.validate_manual_edit(
+    is_valid, violations, hard_count, soft_pen, total_cost = ScheduleService.validate_manual_edit(
         session_id=req.session_id,
         target_day=req.target_day,
         target_period=req.target_period,
@@ -82,25 +92,41 @@ def validate_manual_edit(req: ManualEditRequest):
     )
     return APIResponse(
         success=is_valid,
-        message="Move is clash-free and satisfies all 9 hard constraints" if is_valid else "Move violates hard constraints",
-        data={"is_valid": is_valid, "violations": violations}
+        message="Move is clash-free and satisfies all 9 hard constraints" if is_valid else f"Move violates {hard_count} hard constraint(s)",
+        data={
+            "is_valid": is_valid,
+            "violations": violations,
+            "hard_violations_count": hard_count,
+            "soft_penalty": soft_pen,
+            "total_cost": total_cost
+        }
     )
 
+@router.post("/manual-edit", response_model=APIResponse)
 @router.patch("/sessions/{session_id}", response_model=APIResponse)
-def apply_manual_edit(session_id: str, req: ManualEditRequest):
-    success, msg = ScheduleService.apply_manual_edit(
-        session_id=session_id,
+def apply_manual_edit(req: ManualEditRequest, session_id: Optional[str] = None):
+    target_sid = session_id or req.session_id
+    success, msg, violations = ScheduleService.apply_manual_edit(
+        session_id=target_sid,
         target_day=req.target_day,
         target_period=req.target_period,
         target_room_id=req.target_room_id,
-        target_teacher_id=req.target_teacher_id
+        target_teacher_id=req.target_teacher_id,
+        apply_anyway=req.apply_anyway
     )
     if not success:
-        raise HTTPException(status_code=400, detail=msg)
+        return APIResponse(
+            success=False,
+            message=msg,
+            data={"violations": violations}
+        )
     
-    updated_sess = db_store.sessions[session_id]
+    updated_sess = db_store.sessions[target_sid]
     return APIResponse(
         success=True,
         message=msg,
-        data=enrich_session(updated_sess)
+        data={
+            "session": enrich_session(updated_sess),
+            "violations": violations
+        }
     )
