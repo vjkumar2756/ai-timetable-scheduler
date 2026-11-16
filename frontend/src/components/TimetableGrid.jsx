@@ -1,10 +1,12 @@
-import React from 'react';
-import { User, MapPin, Clock, Edit2, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { User, MapPin, Clock, Edit2, AlertCircle, GripVertical, ArrowRightLeft, Move } from 'lucide-react';
 
 export default function TimetableGrid({
   sessions = [],
   settings = { days: ["Mon", "Tue", "Wed", "Thu", "Fri"], periods_per_day: 6, default_lunch_period: 4 },
   onSessionClick,
+  onSessionDrop,
+  isDragDropEnabled = true,
   viewMode = "class",
   selectedEntityId = "",
   currentEntityName = ""
@@ -13,6 +15,10 @@ export default function TimetableGrid({
   const periodsCount = settings.periods_per_day || 6;
   const lunchPeriod = settings.default_lunch_period || 4;
   const periods = Array.from({ length: periodsCount }, (_, i) => i + 1);
+
+  // Drag and Drop state
+  const [draggedSession, setDraggedSession] = useState(null);
+  const [dragOverCell, setDragOverCell] = useState(null); // { day, period }
 
   // Group sessions by day and period
   // Structure: gridMap[day][period] = session
@@ -32,6 +38,70 @@ export default function TimetableGrid({
       }
     }
   });
+
+  // --- HTML5 Drag & Drop Handlers ---
+  const handleDragStart = (e, session) => {
+    if (!isDragDropEnabled || session.isExtension) return;
+    setDraggedSession(session);
+    e.dataTransfer.setData('text/plain', session.id);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragEnd = () => {
+    setDraggedSession(null);
+    setDragOverCell(null);
+  };
+
+  const handleDragOver = (e, day, period) => {
+    if (!isDragDropEnabled || !draggedSession) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+
+    if (!dragOverCell || dragOverCell.day !== day || dragOverCell.period !== period) {
+      setDragOverCell({ day, period });
+    }
+  };
+
+  const handleDragLeave = (e, day, period) => {
+    if (dragOverCell && dragOverCell.day === day && dragOverCell.period === period) {
+      setDragOverCell(null);
+    }
+  };
+
+  const handleDrop = (e, day, period, targetItem) => {
+    if (!isDragDropEnabled || !draggedSession) return;
+    e.preventDefault();
+
+    const sourceSession = draggedSession;
+    setDraggedSession(null);
+    setDragOverCell(null);
+
+    // Guard: dropping on lunch break
+    if (period === lunchPeriod) {
+      return;
+    }
+
+    // Guard: dropping on same slot
+    if (sourceSession.day === day && sourceSession.period === period) {
+      return;
+    }
+
+    // Guard: 2-hour lab boundary checks
+    if (sourceSession.duration > 1) {
+      if (period + 1 > periodsCount || period === lunchPeriod || (period + 1) === lunchPeriod) {
+        return;
+      }
+    }
+
+    // Determine target session (ignore if target is extension of source itself)
+    const effectiveTarget = (targetItem && targetItem.id !== sourceSession.id && !targetItem.isExtension)
+      ? targetItem
+      : null;
+
+    if (onSessionDrop) {
+      onSessionDrop(sourceSession, day, period, effectiveTarget);
+    }
+  };
 
   return (
     <div className="timetable-container">
@@ -55,31 +125,91 @@ export default function TimetableGrid({
               {periods.map(period => {
                 // Lunch Break Column
                 if (period === lunchPeriod) {
+                  const isHoveringLunch = dragOverCell?.day === day && dragOverCell?.period === period;
                   return (
-                    <td key={period} className="lunch-slot">
-                      LUNCH BREAK
+                    <td 
+                      key={period} 
+                      className={`lunch-slot ${isHoveringLunch ? 'drag-target-invalid' : ''}`}
+                      onDragOver={e => handleDragOver(e, day, period)}
+                      onDragLeave={e => handleDragLeave(e, day, period)}
+                      onDrop={e => handleDrop(e, day, period, null)}
+                    >
+                      <div>LUNCH BREAK</div>
+                      {isHoveringLunch && (
+                        <div className="drop-badge drop-badge-invalid">Blocked (H9)</div>
+                      )}
                     </td>
                   );
                 }
 
                 const item = gridMap[day] ? gridMap[day][period] : null;
+                const isHovered = dragOverCell?.day === day && dragOverCell?.period === period;
+                const isDraggingThis = draggedSession && item && draggedSession.id === item.id;
 
+                // Determine drag-over styling class
+                let dragCellClass = '';
+                let dropBadgeLabel = '';
+                let dropBadgeType = '';
+
+                if (isHovered && draggedSession) {
+                  const isSameSlot = draggedSession.day === day && draggedSession.period === period;
+                  const isLabOverflow = draggedSession.duration > 1 && (period + 1 > periodsCount || (period + 1) === lunchPeriod);
+
+                  if (isSameSlot) {
+                    // Current slot
+                  } else if (isLabOverflow) {
+                    dragCellClass = 'drag-target-invalid';
+                    dropBadgeLabel = 'Lab Overflow';
+                    dropBadgeType = 'invalid';
+                  } else if (item && item.id !== draggedSession.id && !item.isExtension) {
+                    dragCellClass = 'drag-target-swap';
+                    dropBadgeLabel = 'Drop to Swap';
+                    dropBadgeType = 'swap';
+                  } else if (!item) {
+                    dragCellClass = 'drag-target-valid';
+                    dropBadgeLabel = 'Drop to Move';
+                    dropBadgeType = 'valid';
+                  }
+                }
+
+                // Empty / Free slot
                 if (!item) {
                   return (
-                    <td key={period} className="slot-cell">
-                      <div className="free-slot">Free Period</div>
+                    <td 
+                      key={period} 
+                      className={`slot-cell ${dragCellClass}`}
+                      onDragOver={e => handleDragOver(e, day, period)}
+                      onDragLeave={e => handleDragLeave(e, day, period)}
+                      onDrop={e => handleDrop(e, day, period, null)}
+                    >
+                      <div className="free-slot">
+                        {dropBadgeLabel ? (
+                          <span className={`drop-badge drop-badge-${dropBadgeType}`}>
+                            <Move size={10} style={{ marginRight: '3px' }} /> {dropBadgeLabel}
+                          </span>
+                        ) : (
+                          'Free Period'
+                        )}
+                      </div>
                     </td>
                   );
                 }
 
-                // If this is the second period of a 2-hour lab, it was rendered spanning or marked
+                // If this is the second period of a 2-hour lab
                 if (item.isExtension) {
                   return (
-                    <td key={period} className="slot-cell" style={{ opacity: 0.85 }}>
+                    <td 
+                      key={period} 
+                      className={`slot-cell ${dragCellClass}`} 
+                      style={{ opacity: 0.85 }}
+                      onDragOver={e => handleDragOver(e, day, period)}
+                      onDragLeave={e => handleDragLeave(e, day, period)}
+                      onDrop={e => handleDrop(e, day, period, item)}
+                    >
                       <div 
                         className={`session-box ${item.subject_type === 'lab' ? 'lab' : 'theory'} ${item.status}`}
                         onClick={() => onSessionClick && onSessionClick(item)}
-                        title="Click to view or edit slot"
+                        title="Click to view or edit slot (Lab continuation)"
                       >
                         <div className="session-header">
                           <span className="session-code">{item.subject_code} (Cont.)</span>
@@ -94,15 +224,30 @@ export default function TimetableGrid({
                   );
                 }
 
+                // Normal Session Slot
                 return (
-                  <td key={period} className="slot-cell">
+                  <td 
+                    key={period} 
+                    className={`slot-cell ${dragCellClass}`}
+                    onDragOver={e => handleDragOver(e, day, period)}
+                    onDragLeave={e => handleDragLeave(e, day, period)}
+                    onDrop={e => handleDrop(e, day, period, item)}
+                  >
                     <div 
-                      className={`session-box ${item.subject_type === 'lab' ? 'lab' : 'theory'} ${item.status}`}
+                      className={`session-box ${item.subject_type === 'lab' ? 'lab' : 'theory'} ${item.status} ${isDraggingThis ? 'is-dragging' : ''} ${isDragDropEnabled ? 'draggable-card' : ''}`}
+                      draggable={isDragDropEnabled}
+                      onDragStart={e => handleDragStart(e, item)}
+                      onDragEnd={handleDragEnd}
                       onClick={() => onSessionClick && onSessionClick(item)}
-                      title="Click to edit or move slot"
+                      title={isDragDropEnabled ? "Drag to move or swap, or click to edit" : "Click to edit or move slot"}
                     >
                       <div className="session-header">
-                        <span className="session-code">{item.subject_code}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                          {isDragDropEnabled && (
+                            <GripVertical size={12} className="drag-grip-icon" />
+                          )}
+                          <span className="session-code">{item.subject_code}</span>
+                        </div>
                         <span className={`badge ${item.subject_type === 'lab' ? 'badge-lab' : 'badge-theory'}`}>
                           {item.subject_type === 'lab' ? 'LAB (2h)' : 'THEORY'}
                         </span>
@@ -133,6 +278,13 @@ export default function TimetableGrid({
                           {item.room_name?.split(' ')[0] || item.room_name}
                         </span>
                       </div>
+
+                      {/* Drop indicator overlay on occupied cell */}
+                      {dropBadgeLabel && (
+                        <div className={`drop-badge drop-badge-${dropBadgeType} drop-badge-floating`}>
+                          <ArrowRightLeft size={10} style={{ marginRight: '3px' }} /> {dropBadgeLabel}
+                        </div>
+                      )}
                     </div>
                   </td>
                 );

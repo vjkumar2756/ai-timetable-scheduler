@@ -600,3 +600,109 @@ body {
   border: 1px solid rgba(99, 102, 241, 0.3);
   color: #c7d2fe;
 }
+
+/* --- Drag & Drop Timetable Interactions --- */
+.draggable-card {
+  cursor: grab;
+  user-select: none;
+}
+
+.draggable-card:active {
+  cursor: grabbing;
+}
+
+.drag-grip-icon {
+  color: var(--text-muted);
+  opacity: 0.6;
+  flex-shrink: 0;
+  transition: opacity 0.15s ease;
+}
+
+.draggable-card:hover .drag-grip-icon {
+  opacity: 1;
+  color: var(--primary);
+}
+
+.session-box.is-dragging {
+  opacity: 0.3 !important;
+  transform: scale(0.96) !important;
+  border: 2px dashed var(--primary) !important;
+  cursor: grabbing !important;
+  box-shadow: none !important;
+}
+
+.slot-cell.drag-target-valid {
+  background-color: rgba(16, 185, 129, 0.16) !important;
+  outline: 2px dashed var(--emerald) !important;
+  outline-offset: -2px;
+  transition: all 0.15s ease;
+}
+
+.slot-cell.drag-target-swap {
+  background-color: rgba(245, 158, 11, 0.18) !important;
+  outline: 2px dashed var(--amber) !important;
+  outline-offset: -2px;
+  transition: all 0.15s ease;
+}
+
+.slot-cell.drag-target-invalid,
+.lunch-slot.drag-target-invalid {
+  background-color: rgba(244, 63, 94, 0.22) !important;
+  outline: 2px dashed var(--rose) !important;
+  outline-offset: -2px;
+  cursor: not-allowed !important;
+  transition: all 0.15s ease;
+}
+
+.drop-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.25rem 0.55rem;
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+  animation: modalIn 0.15s ease-out;
+}
+
+.drop-badge-valid {
+  background: rgba(16, 185, 129, 0.25);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.5);
+}
+
+.drop-badge-swap {
+  background: rgba(245, 158, 11, 0.25);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.5);
+}
+
+.drop-badge-invalid {
+  background: rgba(244, 63, 94, 0.25);
+  color: #f87171;
+  border: 1px solid rgba(244, 63, 94, 0.5);
+}
+
+.drop-badge-floating {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: max-content;
+  height: max-content;
+  z-index: 10;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+

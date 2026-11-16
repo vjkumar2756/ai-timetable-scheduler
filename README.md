@@ -49,6 +49,7 @@
 
 ### 4. Enterprise Academic Dashboard (React + Chart.js)
 - **Visual Timetable Matrix:** Day-by-period grid with filters by Class, Teacher, Room, and Day.
+- **Interactive Drag-and-Drop Grid:** Direct drag-and-drop slot rescheduling with real-time green/amber/red collision detection, toast alerts, and mutual lecture swap modal.
 - **Real-Time Conflict-Aware Slot Editor:** Immediate backend verification flagging any constraint conflicts before saving.
 - **Missed Lecture Rescheduling Engine:** Auto-scans and ranks clash-free replacement slots.
 - **Faculty Class-Swap Workflow:** Validates proposed lecture exchanges between faculty members.
