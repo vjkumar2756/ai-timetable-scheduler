@@ -46,6 +46,10 @@ def test_excel_and_pdf_exports():
     assert len(pdf_bytes) > 1000
 
 def test_python_constraint_checker():
+    try:
+        import constraint
+    except ImportError:
+        pytest.skip("python-constraint library not installed in test environment")
     is_consistent, msg, details = PythonConstraintChecker.verify_schedule_with_cross_check()
     assert is_consistent
     assert details["checked_sessions"] > 0

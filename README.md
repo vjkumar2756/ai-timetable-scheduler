@@ -61,6 +61,7 @@ Creating conflict-free university timetables is a notoriously difficult, $\mathc
 | **3-Way Master Grid Matrix** | Dynamic multi-view timetable rendering: **By Class Cohort**, **By Faculty Member**, or **By Physical Room**. | Instant clarity for department heads, individual instructors, and facility managers alike. |
 | **Operational Rescheduling Suite** | Real-time lecture cancellation, automated conflict-free make-up slot recommendation with substitute teacher matching, and bilateral faculty swap validation. | Resolves unplanned faculty leaves and room maintenance without disrupting the rest of the institution. |
 | **Fixed-View Workload Analytics** | Plotly analytics for faculty teaching quotas and facility utilization, configured with fixed non-zooming viewports for consistent readability. | Provides dean-level oversight into faculty teaching distributions and underutilized infrastructure. |
+| **Interactive Drag & Drop Grid** | Direct drag-and-drop slot rescheduling with real-time green/amber/red collision detection, toast alerts, and mutual lecture swap modal. | Immediate, intuitive visual rescheduling without manual form entry or risk of clashes. |
 | **Enterprise Multi-Format Export** | 1-click generation of formatted, printable **PDF** reports, structured **Excel (.xlsx)** workbooks, and raw **CSV** matrices. | Ready for notice boards, faculty intranet distribution, and external academic record systems. |
 
 ---
