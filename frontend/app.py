@@ -3,6 +3,7 @@ frontend/app.py
 SchedulAI: AI-Based College Timetable Scheduler — Main Streamlit Application.
 Pure Python + Streamlit frontend. Communicates with FastAPI backend over HTTP/JSON.
 """
+import os
 import streamlit as st
 from frontend.theme import apply_theme
 from frontend.api_client import APIClient
