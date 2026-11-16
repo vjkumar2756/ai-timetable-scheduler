@@ -25,7 +25,7 @@ def test_manual_edit_lunch_violation():
     lunch_p = cls.lunch_break_period
 
     # Attempt to move to lunch slot
-    is_valid, viols = ScheduleService.validate_manual_edit(
+    is_valid, viols, *rest = ScheduleService.validate_manual_edit(
         session_id=session_id,
         target_day="Mon",
         target_period=lunch_p,
@@ -36,7 +36,7 @@ def test_manual_edit_lunch_violation():
     assert any(v["code"] == "H9" for v in viols)
 
     # Attempting to apply must fail
-    success, msg = ScheduleService.apply_manual_edit(
+    success, msg, *rest = ScheduleService.apply_manual_edit(
         session_id=session_id,
         target_day="Mon",
         target_period=lunch_p,
@@ -65,7 +65,7 @@ def test_manual_edit_valid_move():
         for p in periods:
             if p == db_store.classes[target_session.class_id].lunch_break_period:
                 continue
-            is_valid, viols = ScheduleService.validate_manual_edit(
+            is_valid, viols, *rest = ScheduleService.validate_manual_edit(
                 session_id=target_session.id,
                 target_day=d,
                 target_period=p,
@@ -83,7 +83,7 @@ def test_manual_edit_valid_move():
     assert found_valid, "Should find at least one valid slot in small dataset"
 
     # Apply edit
-    success, msg = ScheduleService.apply_manual_edit(
+    success, msg, *rest = ScheduleService.apply_manual_edit(
         session_id=target_session.id,
         target_day=valid_day,
         target_period=valid_period,
