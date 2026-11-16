@@ -39,6 +39,12 @@ def startup_load_default_data():
         db_store.load_from_dict(data)
         print(f"[SchedulAI] Default small dataset loaded: {len(db_store.classes)} classes, {len(db_store.teachers)} teachers")
 
+    # Generate initial baseline schedule if not already populated
+    if db_store.classes and not db_store.sessions:
+        from backend.app.services.schedule_service import ScheduleService
+        ScheduleService.generate_timetable(algorithm="improved_backtracking", time_limit_seconds=5.0)
+        print(f"[SchedulAI] Initial clash-free timetable generated: {len(db_store.sessions)} sessions")
+
 @app.get("/api/health")
 def health_check():
     return {

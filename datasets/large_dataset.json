@@ -29,7 +29,7 @@
     {"id": "T12", "name": "Dr. Barbara Liskov", "subject_ids": ["CS203", "CS206L"], "unavailable_slots": [], "max_weekly_load": 18, "preferred_slots": [{"day": "Wed", "period": 2}], "active": true},
     {"id": "T13", "name": "Dr. Geoffrey Hinton", "subject_ids": ["AI201", "CS205L"], "unavailable_slots": [{"day": "Mon", "period": 7}], "max_weekly_load": 18, "preferred_slots": [{"day": "Tue", "period": 5}], "active": true},
     {"id": "T14", "name": "Dr. Yann LeCun", "subject_ids": ["AI201", "CS202"], "unavailable_slots": [], "max_weekly_load": 18, "preferred_slots": [{"day": "Thu", "period": 5}], "active": true},
-    {"id": "T15", "name": "Prof. Donald Knuth", "subject_ids": ["CS202", "MA201"], "unavailable_slots": [], "max_weekly_load": 18, "preferred_slots": [{"day": "Fri", "period": 1}], "active": true},
+    {"id": "T15", "name": "Dr. Happy Mandowara", "subject_ids": ["CS202", "MA201"], "unavailable_slots": [], "max_weekly_load": 18, "preferred_slots": [{"day": "Fri", "period": 1}], "active": true},
     {"id": "T16", "name": "Dr. Andrew Ng", "subject_ids": ["AI201", "CS203"], "unavailable_slots": [], "max_weekly_load": 18, "preferred_slots": [{"day": "Wed", "period": 1}], "active": true}
   ],
   "classes": [

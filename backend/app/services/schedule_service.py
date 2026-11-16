@@ -42,7 +42,8 @@ class ScheduleService:
         cls,
         algorithm: str = "improved_backtracking",
         time_limit_seconds: float = 20.0,
-        random_seed: Optional[int] = 42
+        random_seed: Optional[int] = 42,
+        config: Optional[Dict[str, Any]] = None
     ) -> SolverResult:
         csp, validator, cost_fn = cls.get_csp_and_validators()
 
@@ -64,25 +65,16 @@ class ScheduleService:
                 diagnostic_message=f"Mathematically infeasible: Total required hours ({total_required_hours}) exceed available room slots ({total_room_slots}). Add more rooms or reduce subject hours."
             )
 
-        # Algorithm Selection
-        algo = algorithm.lower().replace("-", "_").replace(" ", "_")
-        
-        if algo in ["plain_backtracking", "baseline"]:
-            solver = PlainBacktrackingSolver(csp, validator, cost_fn)
-            result = solver.solve(time_limit_seconds=time_limit_seconds)
-        elif algo in ["min_conflicts", "local_search"]:
-            solver = MinConflictsSolver(csp, validator, cost_fn, seed=random_seed)
-            result = solver.solve()
-        elif algo in ["simulated_annealing", "sa"]:
-            solver = SimulatedAnnealingSolver(csp, validator, cost_fn, seed=random_seed)
-            result = solver.solve()
-        elif algo in ["hybrid", "hybrid_csp_sa"]:
-            solver = HybridCSPSASolver(csp, validator, cost_fn, seed=random_seed)
-            result = solver.solve()
-        else:
-            # Default / improved_backtracking
-            solver = ImprovedBacktrackingSolver(csp, validator, cost_fn)
-            result = solver.solve(time_limit_seconds=time_limit_seconds)
+        # Algorithm Selection via Unified Registry
+        from algorithms.registry import get_solver, ALGORITHM_REGISTRY
+        algo_clean = algorithm.lower().replace("-", "_").replace(" ", "_")
+        if algo_clean in ["baseline"]:
+            algo_clean = "plain_backtracking"
+        elif algo_clean in ["improved_backtracking"]:
+            algo_clean = "backtracking_heuristics"
+
+        solver = get_solver(algo_clean, csp, validator, cost_fn, config=config, seed=random_seed)
+        result = solver.solve(timeout_seconds=time_limit_seconds)
 
         # Independent Authoritative Verification
         if result.success and result.assignment:
@@ -133,15 +125,15 @@ class ScheduleService:
         target_period: int,
         target_room_id: Optional[str] = None,
         target_teacher_id: Optional[str] = None
-    ) -> Tuple[bool, List[Dict[str, Any]]]:
+    ) -> Tuple[bool, List[Dict[str, Any]], int, int, int]:
         """
         Authoritative validation of proposed manual session move/edit.
-        Returns: (is_valid, list_of_violations)
+        Returns: (is_valid, list_of_violations, hard_count, soft_penalty, total_cost)
         """
         if session_id not in db_store.sessions:
-            return False, [{"code": "NOT_FOUND", "message": f"Session {session_id} not found"}]
+            return False, [{"code": "NOT_FOUND", "message": f"Session {session_id} not found"}], 1, 0, 1000
 
-        csp, validator, _ = cls.get_csp_and_validators()
+        csp, validator, cost_fn = cls.get_csp_and_validators()
         var_map = csp.get_variable_map()
 
         # Build simulated assignment with the proposed change
@@ -165,7 +157,10 @@ class ScheduleService:
         is_valid, hard_count, violations = validator.validate_assignment(
             simulated, var_map, check_completeness=True
         )
-        return is_valid, violations
+        soft_pen, _, _ = cost_fn.evaluate_soft_penalties(simulated, var_map)
+        total_cost = cost_fn.compute_total_cost(hard_count, soft_pen)
+
+        return is_valid, violations, hard_count, soft_pen, total_cost
 
     @classmethod
     def apply_manual_edit(
@@ -174,14 +169,15 @@ class ScheduleService:
         target_day: str,
         target_period: int,
         target_room_id: Optional[str] = None,
-        target_teacher_id: Optional[str] = None
-    ) -> Tuple[bool, str]:
-        is_valid, violations = cls.validate_manual_edit(
+        target_teacher_id: Optional[str] = None,
+        apply_anyway: bool = False
+    ) -> Tuple[bool, str, List[Dict[str, Any]]]:
+        is_valid, violations, hard_count, soft_pen, total_cost = cls.validate_manual_edit(
             session_id, target_day, target_period, target_room_id, target_teacher_id
         )
-        if not is_valid:
+        if not is_valid and not apply_anyway:
             reasons = "; ".join(v["message"] for v in violations)
-            return False, f"Cannot move session due to hard constraint violations: {reasons}"
+            return False, f"Cannot move session due to hard constraint violations: {reasons}", violations
 
         sess = db_store.sessions[session_id]
         sess.original_slot = {"day": sess.day, "period": sess.period, "room_id": sess.room_id, "teacher_id": sess.teacher_id}
@@ -192,4 +188,16 @@ class ScheduleService:
         if target_teacher_id:
             sess.teacher_id = target_teacher_id
 
-        return True, "Session updated successfully"
+        # Update metadata reflecting new timetable state
+        db_store.current_schedule_metadata.update({
+            "hard_violations": hard_count,
+            "soft_penalty": soft_pen,
+            "total_cost": total_cost,
+            "last_edit": time.time()
+        })
+
+        status_msg = (
+            f"Session moved with {hard_count} hard conflict(s) flagged." if hard_count > 0
+            else "Session moved successfully with 0 conflicts."
+        )
+        return True, status_msg, violations

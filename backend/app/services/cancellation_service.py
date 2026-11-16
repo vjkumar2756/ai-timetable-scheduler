@@ -11,6 +11,9 @@ class CancellationService:
 
         sess = db_store.sessions[session_id]
         sess.status = "cancelled"
+        if not sess.original_slot:
+            sess.original_slot = {}
+        sess.original_slot["cancellation_reason"] = reason
         
         record = CancellationRecord(
             scope="session",

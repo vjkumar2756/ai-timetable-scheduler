@@ -42,6 +42,46 @@ class ReschedulingService:
             )
         ]
 
+        # Ensure all existing sessions have a corresponding variable in var_map
+        for s_id, other_s in db_store.sessions.items():
+            if s_id not in var_map:
+                o_sub = db_store.subjects.get(other_s.subject_id)
+                var_map[s_id] = LectureVariable(
+                    id=s_id,
+                    class_id=other_s.class_id,
+                    subject_id=other_s.subject_id,
+                    session_index=1,
+                    duration=other_s.duration,
+                    is_lab=(o_sub.type == "lab" if o_sub else False),
+                    subject_code=o_sub.code if o_sub else other_s.subject_id,
+                    subject_name=o_sub.name if o_sub else other_s.subject_id
+                )
+
+        if session_id not in var_map:
+            var_map[session_id] = LectureVariable(
+                id=session_id,
+                class_id=sess.class_id,
+                subject_id=sess.subject_id,
+                session_index=1,
+                duration=sess.duration,
+                is_lab=is_lab,
+                subject_code=sub.code,
+                subject_name=sub.name
+            )
+
+        # Precompute base assignment without the cancelled slot
+        simulated_base: Dict[str, SlotValue] = {}
+        for s_id, other_s in db_store.sessions.items():
+            if s_id == session_id:
+                continue
+            if other_s.status != "cancelled":
+                simulated_base[s_id] = SlotValue(
+                    day=other_s.day,
+                    period=other_s.period,
+                    room_id=other_s.room_id,
+                    teacher_id=other_s.teacher_id
+                )
+
         valid_options = []
 
         # Check candidate slots across working schedule
@@ -61,24 +101,11 @@ class ReschedulingService:
                     continue
 
                 for room in eligible_rooms:
-                    # Construct trial assignment without the cancelled slot
-                    simulated: Dict[str, SlotValue] = {}
-                    for s_id, other_s in db_store.sessions.items():
-                        if s_id == session_id:
-                            continue
-                        if other_s.status != "cancelled":
-                            simulated[s_id] = SlotValue(
-                                day=other_s.day,
-                                period=other_s.period,
-                                room_id=other_s.room_id,
-                                teacher_id=other_s.teacher_id
-                            )
-
-                    # Add proposed candidate slot
                     candidate_slot = SlotValue(day=day, period=period, room_id=room.id, teacher_id=teacher.id)
+                    simulated = dict(simulated_base)
                     simulated[session_id] = candidate_slot
 
-                    # Validate hard constraints
+                    # Validate hard constraints (H1 - H9)
                     is_valid, hard_count, _ = validator.validate_assignment(
                         simulated, var_map, check_completeness=False
                     )
