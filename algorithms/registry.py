@@ -2,7 +2,7 @@
 Central Registry of all AI Timetable Scheduling Algorithms.
 Provides unified dispatching, metadata, hyperparameter schemas, and Auto-Recommendation logic.
 """
-from typing import Dict, Any, Type, Optional
+from typing import Dict, Any, Type, Optional, Tuple
 from algorithms.base import BaseSolver
 from algorithms.backtracking_plain import PlainBacktrackingWrapper
 from algorithms.backtracking_heuristics import BacktrackingWithHeuristicsSolver
