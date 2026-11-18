@@ -32,11 +32,18 @@
 - [📋 Constraint System Explained](#-constraint-system-explained)
   - [1. Hard Constraints (H1–H9) — Zero Clashes ($H = 0$)](#1-hard-constraints-h1h9--zero-clashes-h--0)
   - [2. Soft Constraints (S1–S5) — Quality Tuning](#2-soft-constraints-s1s5--quality-tuning)
-- [🧠 The AI Algorithms Explained in Plain English](#-the-ai-algorithms-explained-in-plain-english)
+- [🧠 Deep-Dive Technical Explanation Notes](#-deep-dive-technical-explanation-notes)
+  - [Note 1: The Timetabling Problem as a Formal CSP](#note-1-the-timetabling-problem-as-a-formal-csp)
+  - [Note 2: Systematic Search & The Heuristics (MRV, Degree, FC, LCV)](#note-2-systematic-search--the-heuristics-mrv-degree-fc-lcv)
+  - [Note 3: Heuristic Local Search (Min-Conflicts with Plateau Escape)](#note-3-heuristic-local-search-min-conflicts-with-plateau-escape)
+  - [Note 4: Metaheuristics & Simulated Annealing (Metropolis-Hastings)](#note-4-metaheuristics--simulated-annealing-metropolis-hastings)
+  - [Note 5: The Two-Stage Decoupled Hybrid CSP + SA Engine](#note-5-the-two-stage-decoupled-hybrid-csp--sa-engine)
+  - [Note 6: Atomic 2-Hour Practical Lab Modeling](#note-6-atomic-2-hour-practical-lab-modeling)
+  - [Note 7: Operational Rescheduling & In-Memory Mutation Safety](#note-7-operational-rescheduling--in-memory-mutation-safety)
 - [🏆 Empirical Benchmarks](#-empirical-benchmarks)
 - [📡 API Reference](#-api-reference)
 - [📂 Repository Structure](#-repository-structure)
-- [🎓 Viva Defense & Interview Cheat Sheet](#-viva-defense--interview-cheat-sheet)
+- [🎓 Viva Defense & Interview Master Q&A](#-viva-defense--interview-master-qa)
 - [🧪 Testing & Verification](#-testing--verification)
 - [🔧 Troubleshooting & FAQ](#-troubleshooting--faq)
 - [👨‍💻 Author & License](#-author--license)
@@ -46,19 +53,17 @@
 ## 💡 Executive Overview & The Problem
 
 ### ❌ The Real-World Timetabling Problem
-Creating a university timetable is a notoriously difficult **$\mathcal{NP}$-complete combinatorial scheduling problem**. In any university or college:
-- **Teachers get double-booked:** Professor A is mistakenly assigned to two different classes at 10:00 AM.
-- **Room collisions occur:** Two sections try to enter the same lecture hall at the same time.
-- **Capacity mismatches happen:** A class of 70 students is allocated to a small 40-seat tutorial room.
-- **Laboratory mismatches:** A practical Computer Lab course gets assigned to an ordinary chalkboard classroom with no computers.
-- **Student & Faculty Burnout:** Students suffer 3-hour idle gaps between lectures, or professors are forced to lecture 4 hours back-to-back without a break.
-- **Mid-Semester Chaos:** When a faculty member goes on emergency leave or a class is cancelled, coordinators spend days manually rescheduling make-up sessions in spreadsheets.
+Creating conflict-free university timetables is a notoriously difficult **$\mathcal{NP}$-complete combinatorial scheduling problem**. In traditional academic administration, coordinators spend 2 to 3 weeks using manual spreadsheets, frequently resulting in:
+- **Teacher & Room Collisions:** Simultaneous double-booking of instructors or lecture halls.
+- **Capacity & Facility Mismatches:** Placing a 70-student class into a 40-seat tutorial room, or placing computer programming practicals in ordinary theory classrooms with no workstations.
+- **Pedagogical Degradation & Fatigue:** Students suffer disjointed 2–3 hour idle gaps between classes; teachers are assigned $>3$ back-to-back lecture periods without recovery time.
+- **Mid-Semester Fragility:** When faculty take unplanned leave or a room requires maintenance, attempting manual make-up sessions creates a ripple of new clashes across the institution.
 
-###  The SchedulAI Solution
-**SchedulAI** models university timetabling as a formal **Constraint Satisfaction Problem (CSP)**. By combining exact systematic search heuristics with stochastic local search (Simulated Annealing):
-1. **Guarantees Zero Hard Conflicts ($H = 0$):** Eliminates all room, class, and teacher collisions in $<4$ seconds.
-2. **Optimizes Human Comfort:** Minimizes student idle gaps, protects lunch breaks, ensures 2-hour lab continuity, and prevents faculty fatigue.
-3. **Provides a Live Decision Support Dashboard:** Enables 1-click lecture cancellations, conflict-free make-up slot recommendations, faculty swaps, and multi-format exports (PDF, Excel, CSV).
+### 🌟 The SchedulAI Solution
+**SchedulAI** models university timetabling as a formal **Constraint Satisfaction Problem (CSP)** with soft penalty optimization. By coupling exact systematic search heuristics with stochastic local search metaheuristics (Simulated Annealing):
+1. **Guarantees Zero Hard Conflicts ($H = 0$):** Eliminates 100% of teacher, class, and room clashes in $<4$ seconds.
+2. **Maximizes Human Comfort:** Minimizes student idle windows, guarantees protected lunch breaks, preserves 2-hour practical lab continuity, and balances teacher workloads.
+3. **Provides an Operational Web Decision Support System:** Features 1-click lecture cancellations, conflict-free make-up slot discovery with substitute matching, bilateral faculty swaps, and multi-format exports (PDF, Excel, CSV).
 
 ---
 
@@ -66,10 +71,10 @@ Creating a university timetable is a notoriously difficult **$\mathcal{NP}$-comp
 
 | Capability | What It Does | Why It Matters |
 | :--- | :--- | :--- |
-| **Instant Conflict-Free Generation** | Uses Backtracking with MRV, Degree Heuristic, Forward Checking, and LCV. | Replaces 2 weeks of error-prone manual spreadsheet planning with a verified schedule in $<4$s. |
+| **Instant Conflict-Free Generation** | Uses Backtracking with MRV, Degree Heuristic, Forward Checking, and LCV. | Replaces 2 weeks of manual spreadsheet planning with a verified schedule in $<4$s. |
 | **Two-Stage Hybrid Optimization** | Stage 1 solves all hard constraints ($H=0$); Stage 2 polishes soft criteria ($S$) via Simulated Annealing. | Delivers a **53.1% reduction in soft penalties** without ever violating institutional rules. |
-| **3-Way Master Grid Matrix** | Dynamically render schedules **By Class Cohort**, **By Faculty Member**, or **By Physical Room**. | Instant visibility for department deans, individual professors, and campus facility managers. |
-| **Operational Rescheduling Suite** | Single-click lecture cancellation, automatic make-up slot discovery, substitute teacher matching, and bilateral swaps. | Handles faculty leaves and room maintenance dynamically without throwing off the rest of the college. |
+| **3-Way Master Grid Matrix** | Dynamically renders schedules **By Class Cohort**, **By Faculty Member**, or **By Physical Room**. | Instant clarity for department deans, individual professors, and campus facility managers. |
+| **Operational Rescheduling Suite** | Single-click lecture cancellation, automatic make-up slot discovery, substitute teacher matching, and bilateral swaps. | Handles faculty leaves and room maintenance dynamically without disrupting the rest of the college. |
 | **Institutional Workload Analytics** | Interactive Plotly visual charts auditing faculty teaching hours and facility capacity utilization. | Provides deans immediate oversight into unallocated hours and under-utilized campus infrastructure. |
 | **Enterprise Multi-Format Export** | 1-click export to printable **PDF** reports, structured **Excel (.xlsx)** workbooks, and raw **CSV** sheets. | Ready for immediate distribution on notice boards, faculty portals, and student apps. |
 
@@ -231,48 +236,178 @@ $$\text{Total Objective Cost} = 1000 \times H + S$$
 
 ---
 
-## 🧠 The AI Algorithms Explained in Plain English
+## 🧠 Deep-Dive Technical Explanation Notes
 
-SchedulAI implements five primary scheduling algorithms, each with distinct trade-offs:
+> [!NOTE]
+> This section contains rigorous mathematical formulations, algorithmic execution mechanics, and design explanations. Ideal for academic review, project defense, and architectural understanding.
+
+### Note 1: The Timetabling Problem as a Formal CSP
+
+A formal **Constraint Satisfaction Problem (CSP)** is defined as a triplet:
+
+$$\langle \mathcal{X}, \mathcal{D}, \mathcal{C} \rangle$$
+
+1. **Variables ($\mathcal{X}$):**
+   Let $\mathcal{C}$ be the set of student class cohorts, $\mathcal{S}$ the set of subjects, and $\mathcal{T}$ the set of teachers.
+   Each required course contact block is modeled as an individual decision variable:
+   $$\mathcal{X} = \{ X_{c, s, k} \mid c \in \mathcal{C},\, s \in \mathcal{S},\, k \in \{1, \dots, \lceil \text{weekly\_hours}(c, s) / \text{duration}(s) \rceil\} \}$$
+   For example, if CS-Year2 needs 4 hours of Data Structures (theory, duration=1), it generates 4 discrete variables: $X_{CS2, DS, 1}, X_{CS2, DS, 2}, X_{CS2, DS, 3}, X_{CS2, DS, 4}$.
+
+2. **Domains ($\mathcal{D}$):**
+   The domain $\mathcal{D}(X)$ of each variable $X$ is the set of legal candidate assignments:
+   $$\mathcal{D}(X) = \{ \langle \text{day}, \text{period}, \text{room}, \text{teacher} \rangle \} \subseteq \text{Days} \times \text{Periods} \times \mathcal{R} \times \mathcal{T}$$
+   For a standard 5-day week with 7 periods per day, 8 rooms, and 16 teachers, the raw Cartesian space is:
+   $$5 \times 7 \times 8 \times 16 = 4,480 \text{ choices per variable}$$
+   With 40 variables, total combinations reach $4480^{40} \approx 10^{146}$ states.
+
+3. **Constraints ($\mathcal{C}$):**
+   The set of hard relational predicates ($H_1$ to $H_9$) that must strictly evaluate to `True`.
+
+---
+
+### Note 2: Systematic Search & The Heuristics (MRV, Degree, FC, LCV)
+
+Pure chronological Depth-First Search explores paths blindly and experiences severe **thrashing**—repeatedly exploring subtrees doomed by an early mistake made near the root. SchedulAI equips backtracking with four classical AI heuristics:
+
+#### 1. Minimum Remaining Values (MRV / "Fail-First" Principle)
+- **Problem:** In standard search, variables are assigned in an arbitrary static order. If variable $X_{35}$ has only 1 legal value left due to constraints, picking $X_1$ first wastes time branching on thousands of useless choices before discovering that $X_{35}$ cannot be satisfied.
+- **MRV Solution:** At each decision step, MRV dynamically inspects all remaining unassigned variables and chooses:
+  $$X^* = \arg\min_{X \in \mathcal{X}_{\text{unassigned}}} |\mathcal{D}(X)|$$
+- **Effect:** If any branch leads to a dead end, it fails immediately at the current level, drastically reducing tree depth.
+
+#### 2. Degree Heuristic (Constraint Graph Density Tie-Breaker)
+- **Problem:** At the beginning of search, many variables have equal domain sizes. MRV cannot distinguish between them.
+- **Degree Solution:** Selects the variable involved in the largest number of constraints with other *unassigned* variables:
+  $$X^* = \arg\max_{X \in \text{Ties(MRV)}} |\{ Y \in \mathcal{X}_{\text{unassigned}} \mid (X, Y) \in \text{ConstraintGraph} \}|$$
+- **Effect:** Instantiating the most connected variable prunes the maximum number of values from future domains, effectively shrinking the future branching factor.
+
+#### 3. Forward Checking (FC / Proactive Pruning)
+- **Problem:** Backtracking only checks if the *current* assignment violates constraints. It does not look ahead to see if the assignment starves future variables.
+- **FC Solution:** Whenever variable $X$ is assigned slot $\langle d, p, r, t \rangle$:
+  1. For every unassigned variable $Y$ sharing teacher $t$, class $c$, or room $r$, prune overlapping slots from $\mathcal{D}(Y)$.
+  2. If any unassigned variable's domain becomes empty ($\mathcal{D}(Y) = \emptyset$), the assignment is **immediately aborted** without expanding further child nodes.
+  3. A restoration stack records all pruned values so that when backtracking occurs, domains are restored in $O(1)$ time.
+
+#### 4. Least Constraining Value (LCV / "Succeed-First" Value Ordering)
+- **Problem:** Once variable $X$ is selected, in what order should its domain values $v \in \mathcal{D}(X)$ be attempted?
+- **LCV Solution:** Ranks candidate values $v$ by the number of choices they eliminate from other unassigned variables:
+  $$v^* = \arg\min_{v \in \mathcal{D}(X)} \sum_{Y \in \text{Neighbors}(X)} \mathbb{I}(v \text{ conflicts with } u \in \mathcal{D}(Y))$$
+- **Effect:** Maximizes the likelihood that the first tried value successfully extends to a complete conflict-free solution.
+
+---
+
+### Note 3: Heuristic Local Search (Min-Conflicts with Plateau Escape)
+
+Unlike systematic search which works with partial assignments, **Local Search** operates on complete states that may contain conflicts.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│                               AI Algorithm Spectrum                             │
-├──────────────────────────┬──────────────────────────┬───────────────────────────┤
-│ Systematic CSP (Exact)   │ Local Search (Heuristic) │ Decoupled Hybrid (Best)   │
-│ • Plain Backtracking     │ • Min-Conflicts          │ • Hybrid CSP + SA         │
-│ • Improved Backtracking  │ • Simulated Annealing    │   Stage 1: CSP (H = 0)    │
-│   (MRV + FC + Deg + LCV) │ • Tabu Search, GA, LNS   │   Stage 2: SA  (Min S)    │
-└──────────────────────────┴──────────────────────────┴───────────────────────────┘
+│                      Min-Conflicts Algorithm Step-by-Step                       │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│ 1. Initialize: Assign every lecture variable a slot (e.g. random or greedy).   │
+│ 2. Evaluate: Identify all variables currently involved in clashes (H > 0).     │
+│ 3. Termination: If conflicts == 0, return current feasible schedule.            │
+│ 4. Variable Selection: Randomly pick one conflicted variable X_conflict.        │
+│ 5. Value Selection (Heuristic Repair):                                          │
+│    With probability (1 - p):                                                    │
+│        Assign X_conflict the value v that minimizes total schedule conflicts.   │
+│    With probability p = 0.08 (Random Walk):                                     │
+│        Assign X_conflict a random legal slot (breaks out of plateaus).          │
+│ 6. Restart Check: If iterations > max_steps without progress, perform random    │
+│    restart to escape deep local minima traps.                                   │
+└─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 1. Plain Backtracking (Baseline)
-- **Concept:** Depth-First Search (DFS) that assigns slots one by one and backtracks when a collision occurs.
-- **Analogy:** Trying to find your way out of a huge maze blindly—if you hit a wall, you step back one step and try the next door.
-- **Limitation:** Suffers from severe *thrashing* (exponential slowdown $O(d^n)$) on large schedules because it doesn't look ahead.
+---
 
-### 2. Improved Backtracking (MRV + Degree + FC + LCV)
-- **MRV (Minimum Remaining Values / "Fail-First"):** Always picks the most constrained class next (the one with the fewest available legal slots). If an assignment is doomed, it fails immediately rather than wasting millions of search steps.
-- **Degree Heuristic:** Tie-breaker that picks the variable involved in the largest number of constraints with other unassigned classes.
-- **Forward Checking (FC):** As soon as a slot is assigned, it immediately crosses off conflicting options from all related future variables. If any variable has 0 options left, it backtracks instantly.
-- **LCV (Least Constraining Value):** Picks the slot that leaves the maximum flexibility for neighboring classes.
+### Note 4: Metaheuristics & Simulated Annealing (Metropolis-Hastings)
 
-### 3. Min-Conflicts Local Search
-- **Concept:** Starts with a complete schedule (which may have clashes) and iteratively moves the most conflicted class to the slot that creates the fewest clashes.
-- **Plateau Escape:** Includes an **8% random-walk probability ($p = 0.08$)** and random restarts to break out of local optima and avoid infinite loops.
+Simulated Annealing is a stochastic optimization metaheuristic derived from physical metallurgy (slow cooling of metals to reach minimum crystalline energy states).
 
-### 4. Simulated Annealing (Metaheuristic)
-- **Concept:** Inspired by the annealing process in metallurgy. Explores neighboring schedule variations.
-- **Metropolis-Hastings Criterion:** Improvements ($\Delta E < 0$) are always accepted. Worse moves ($\Delta E > 0$) are accepted probabilistically:
-  $$P(\text{accept}) = \exp\left(-\frac{\Delta E}{T}\right)$$
-  As the temperature $T$ cools geometrically ($T_{k+1} = \alpha T_k$), the algorithm gradually shifts from broad exploration to fine-tuning.
+1. **State & Energy:**
+   - **State ($S$):** A candidate complete timetable.
+   - **Energy ($E$):** $\text{Cost}(S) = 1000 \times H + S$.
 
-### 5. Two-Stage Hybrid CSP + SA (The Champion Engine)
-- **Why It's the Best:** Pure CSP backtracking finds a valid schedule quickly but stops at the first feasible solution with poor soft scores. Pure SA can struggle to satisfy all 9 hard constraints from scratch.
-- **How It Works:**
-  - **Stage 1 (CSP):** Runs Improved Backtracking to achieve **strict zero hard clashes ($H = 0$)** in milliseconds.
-  - **Stage 2 (Simulated Annealing):** Freezes all hard constraints and applies SA moves that exclusively optimize soft penalties ($S_1$–$S_5$).
-  - **Outcome:** Lowest possible soft penalty score (highest quality schedule) with a 100% guarantee of zero hard clashes.
+2. **Metropolis-Hastings Acceptance Criterion:**
+   Given current state $S$ and neighbor state $S'$, calculate energy differential:
+   $$\Delta E = \text{Cost}(S') - \text{Cost}(S)$$
+   - If $\Delta E < 0$ (the neighbor improves the schedule), the transition is **always accepted**.
+   - If $\Delta E \ge 0$ (the neighbor is worse), the transition is accepted probabilistically with:
+     $$P(\text{accept}) = \exp\left(-\frac{\Delta E}{T}\right)$$
+     where $T$ is the current temperature.
+
+3. **Geometric Cooling Schedule:**
+   After every epoch of $L$ moves, temperature drops:
+   $$T_{k+1} = \alpha \cdot T_k \quad (\text{with } \alpha \approx 0.95)$$
+   - **Early phase ($T$ is high):** Solver accepts worse moves frequently, freely jumping out of local optima and exploring wide topological regions.
+   - **Late phase ($T \to 0$):** Solver becomes greedy, accepting almost exclusively downhill moves to polish fine details.
+
+---
+
+### Note 5: The Two-Stage Decoupled Hybrid CSP + SA Engine
+
+Why is a decoupled two-stage architecture superior to single algorithms?
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                   Stage 1: CSP Improved Backtracking (Exact)                   │
+│   • Variable ordering via MRV + Degree Heuristic                                │
+│   • Forward Checking domain pruning                                             │
+│   • Target: Strict Zero Hard Clashes (H = 0)                                    │
+│   • Execution Time: < 0.20 seconds                                              │
+└────────────────────────────────────────┬────────────────────────────────────────┘
+                                         │ Guaranteed Feasible Seed Schedule (H = 0)
+┌────────────────────────────────────────▼────────────────────────────────────────┐
+│                   Stage 2: Simulated Annealing (Soft Polishing)                 │
+│   • Hard Constraint Invariant Guard: Only moves preserving H = 0 are evaluated  │
+│   • Focuses 100% of iterations on minimizing Soft Penalty (S1–S5)               │
+│   • Results in lowest soft penalties (1,083 pts vs 2,310 baseline)              │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+- **Limitation of Pure CSP:** Backtracking stops at the *first* leaf node satisfying $H = 0$. That solution typically has poor soft quality (awkward student gaps, bad teacher hours) because it never optimizes soft costs.
+- **Limitation of Pure SA:** SA starting from a random state wastes thousands of iterations struggling to resolve basic hard clashes ($H_1$–$H_9$), frequently getting trapped at $H=1$ or $H=2$.
+- **Hybrid Solution:** Stage 1 guarantees mathematical feasibility ($H = 0$) in sub-seconds. Stage 2 takes this clean seed and polishes human comfort ($S_1$–$S_5$), delivering a **53.1% reduction in soft penalties**.
+
+---
+
+### Note 6: Atomic 2-Hour Practical Lab Modeling
+
+In engineering curricula, lab courses require 2 continuous contact hours. A naive implementation creates two 1-hour variables $L_1$ and $L_2$ and adds an explicit adjacency constraint $| \text{period}(L_1) - \text{period}(L_2) | = 1$.
+
+**Why Naive Adjacency Fails:**
+- Doubles the variable search space.
+- Induces domain thrashing: $L_1$ may get placed in Period 7 (end of day) where $L_2$ cannot follow, or $L_1$ gets placed before lunch and $L_2$ after lunch.
+
+**SchedulAI's Atomic Block Solution:**
+1. A practical lab is formulated as a single variable with property `duration = 2`.
+2. During domain generation, its valid start periods are restricted upfront:
+   $$\text{ValidPeriods} = \{ p \in \{1, \dots, \text{periods\_per\_day} - 1\} \mid p \ne \text{lunch\_period} \land (p + 1) \ne \text{lunch\_period} \}$$
+3. Assigning this variable atomically claims both period $p$ and period $p+1$ simultaneously across the room, class, and teacher occupancy matrices.
+4. **Result:** Lab continuity ($S_3$) and lunch break protection ($H_9$) are guaranteed **by construction** without generating extra search variables.
+
+---
+
+### Note 7: Operational Rescheduling & In-Memory Mutation Safety
+
+Academic schedules are living documents that change mid-semester due to teacher sick leave, facility repairs, or sports events.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                    Operational Mutation Validation Pipeline                     │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│ 1. Client Request: Cancel lecture, reschedule session, or bilateral swap.       │
+│ 2. In-Memory Shadow Clone: Clone active session dictionary in DataStore.        │
+│ 3. Dry-Run Mutation: Apply proposed change to the shadow dictionary.            │
+│ 4. Full Constraint Pass: Pass shadow state through ConstraintValidator.         │
+│    • Checks H1 (Teacher), H2 (Class), H3 (Room), H4 (Capacity), H5 (RoomType)   │
+│    • Checks H6 (TeacherAvailability), H8 (TeacherMaxLoad), H9 (LunchProtection) │
+│ 5. Decision Gate:                                                               │
+│    • If Violations == 0: Commit mutation to master store and return HTTP 200.   │
+│    • If Violations > 0: Discard clone, return HTTP 400 with exact clash reason. │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+This guarantees that **no manual edit can ever corrupt the master schedule** or introduce a hidden clash.
 
 ---
 
@@ -301,12 +436,12 @@ The backend exposes a fully documented, asynchronous REST API:
 | `GET` | `/api/health` | Health check endpoint returning active classes, teachers, and session count. |
 | `GET` | `/api/entities/all` | Returns all classes, teachers, rooms, subjects, and settings. |
 | `POST` | `/api/schedule/generate` | Generates a timetable via specified algorithm (`hybrid`, `improved_backtracking`, `min_conflicts`). |
-| `GET` | `/api/schedule/current` | Retrieves the active timetable sessions, KPI metrics, and soft penalty scores. |
+| `GET` | `/api/schedule/current` | Retrieves active timetable sessions, KPI metrics, and soft penalty scores. |
 | `POST` | `/api/operations/cancel` | Cancels a specific lecture session and releases its occupied room. |
 | `POST` | `/api/operations/reschedule` | Finds and reserves conflict-free slots for a cancelled class with substitute matching. |
 | `POST` | `/api/operations/swap` | Performs atomic pre-validation and swap between two scheduled sessions. |
 | `GET` | `/api/analytics/overview` | Returns institutional KPIs (total classes, teacher load, room capacity stats). |
-| `GET` | `/api/analytics/workload` | Returns individual teacher teaching hours against maximum contractual caps. |
+| `GET` | `/api/analytics/workload` | Returns individual teacher teaching hours against contractual caps. |
 | `GET` | `/api/analytics/rooms` | Returns room utilization statistics across days and periods. |
 | `GET` | `/api/io/export/{format}` | Exports active timetable (`pdf`, `xlsx`, `csv`). |
 
@@ -367,10 +502,10 @@ ai-timetable-scheduler/
 
 ---
 
-## 🎓 Viva Defense & Interview Cheat Sheet
+## 🎓 Viva Defense & Interview Master Q&A
 
 ### Q1: Why does Plain Chronological Backtracking struggle on large timetable problems?
-> **Answer:** Plain backtracking selects variables and values in arbitrary order. If an early assignment introduces an unavoidable clash deeper in the search tree, it blindly explores all downstream subtrees before finally backtracking ($O(d^n)$ complexity). It lacks forward-looking intelligence and performs no domain pruning.
+> **Answer:** Plain backtracking selects variables and values in arbitrary static order. If an early assignment introduces an unavoidable clash deeper in the search tree, it blindly explores all downstream subtrees before finally backtracking ($O(d^n)$ complexity). It lacks forward-looking intelligence and performs zero domain pruning.
 
 ### Q2: How do MRV and Forward Checking prevent thrashing?
 > **Answer:** 
